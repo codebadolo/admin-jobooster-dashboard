@@ -1,0 +1,19 @@
+import axios from 'axios';
+
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:8000/api/',
+  timeout: 10000,
+});
+
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('userToken');
+    if (token) {
+      config.headers['Authorization'] = 'Token ' + token; // For DRF TokenAuthentication
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export default axiosInstance;
