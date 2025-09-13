@@ -72,7 +72,7 @@ const Sidebar = () => {
         <Menu.Item
           key="dashboard"
           icon={<DashboardOutlined />}
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/')}
         >
           {!collapsed ? 'Tableau de bord' : <Tooltip title="Tableau de bord"><DashboardOutlined /></Tooltip>}
         </Menu.Item>

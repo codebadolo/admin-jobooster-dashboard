@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Login from './pages/Login';
 import MainLayout from './layout/MainLayout';
@@ -8,6 +8,7 @@ import UserDetail from './pages/UserDetail';
 import UserForm from './pages/UserForm';
 import Dashboard from './pages/Dashboard';
 import SkillsList from './pages/SkillsList';
+
 const App = () => {
   const [authenticated, setAuthenticated] = useState(!!localStorage.getItem('userToken'));
 
@@ -18,27 +19,30 @@ const App = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-      
+
       <Route
         path="/*"
         element={authenticated ? <MainLayout /> : <Navigate to="/login" replace />}
       >
-        {/* Route par défaut "index" qui montre le dashboard */}
-        <Route index element={<Dashboard />} />
+        {/* route index = / */}
+        <Route index  element={<Dashboard />} />
 
-        {/* Routes liées aux utilisateurs */}
+        {/* Routes utilisateurs */}
         <Route path="users" element={<UserList />} />
-    <Route path="users/:id" element={<UserDetail />} />
+        <Route path="users/:id" element={<UserDetail />} />
         <Route path="users/create" element={<UserForm />} />
         <Route path="users/edit/:id" element={<UserForm />} />
-    <Route path="skills/list" element={<SkillsList />} />
-        {/* Vous pouvez ajouter d'autres routes ici */}
+
+        {/* Route compétences */}
+        <Route path="skills/list" element={<SkillsList />} />
       </Route>
 
-      {/* Redirections */}
+      {/* Gestion root path */}
       <Route
         path="/"
-        element={authenticated ? <Navigate to="/" replace /> : <Navigate to="/login" replace />}
+        element={
+          authenticated ? <Navigate to="/" replace /> : <Navigate to="/login" replace />
+        }
       />
 
       {/* Fallback 404 */}
