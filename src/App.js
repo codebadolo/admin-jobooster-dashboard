@@ -8,7 +8,7 @@ import UserDetail from './pages/UserDetail';
 import UserForm from './pages/UserForm';
 import Dashboard from './pages/Dashboard';
 import SkillsList from './pages/SkillsList';
-
+import ContactsList from './pages/ContactsList';
 const App = () => {
   const [authenticated, setAuthenticated] = useState(!!localStorage.getItem('userToken'));
 
@@ -32,6 +32,8 @@ const App = () => {
         <Route path="users/:id" element={<UserDetail />} />
         <Route path="users/create" element={<UserForm />} />
         <Route path="users/edit/:id" element={<UserForm />} />
+        <Route path="users/contacts" element={<ContactsList />} />
+
 
         {/* Route compétences */}
         <Route path="skills/list" element={<SkillsList />} />
