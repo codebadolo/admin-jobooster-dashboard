@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import MainLayout from './layout/MainLayout';
 import UserList from './pages/UserList';
 import UserDetail from './pages/UserDetail';
+import ProfilePage from './pages/ProfilePage'; 
 import UserForm from './pages/UserForm';
 import Dashboard from './pages/Dashboard';
 import SkillsList from './pages/SkillsList';
@@ -37,6 +38,7 @@ const App = () => {
 
         {/* Route compétences */}
         <Route path="skills/list" element={<SkillsList />} />
+          <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       {/* Gestion root path */}

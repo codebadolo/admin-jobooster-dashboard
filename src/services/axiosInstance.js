@@ -9,7 +9,7 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('userToken');
     if (token) {
-      config.headers['Authorization'] = 'Token ' + token; // For DRF TokenAuthentication
+      config.headers['Authorization'] = 'Token ' + token;
     }
     return config;
   },
