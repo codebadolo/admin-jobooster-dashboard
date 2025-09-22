@@ -10,23 +10,36 @@ import UserForm from './pages/UserForm';
 import Dashboard from './pages/Dashboard';
 import SkillsList from './pages/SkillsList';
 import ContactsList from './pages/ContactsList';
+import AdminProfilePage from './pages/AdminProfilePage';
+
 const App = () => {
+  // Initialisez l'authentification selon la présence du token
   const [authenticated, setAuthenticated] = useState(!!localStorage.getItem('userToken'));
 
+  // Fonction appelée après connexion réussie
   const handleLoginSuccess = () => {
     setAuthenticated(true);
   };
 
+  // Fonction pour la déconnexion
+  const handleLogout = () => {
+    setAuthenticated(false);
+    localStorage.removeItem('userToken');
+  };
+
   return (
     <Routes>
-      <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+      <Route 
+        path="/login" 
+        element={<Login onLoginSuccess={handleLoginSuccess} />} 
+      />
 
       <Route
         path="/*"
-        element={authenticated ? <MainLayout /> : <Navigate to="/login" replace />}
+        element={authenticated ? <MainLayout onLogout={handleLogout} /> : <Navigate to="/login" replace />}
       >
-        {/* route index = / */}
-        <Route index  element={<Dashboard />} />
+        {/* Route index = / */}
+        <Route index element={<Dashboard />} />
 
         {/* Routes utilisateurs */}
         <Route path="users" element={<UserList />} />
@@ -34,19 +47,17 @@ const App = () => {
         <Route path="users/create" element={<UserForm />} />
         <Route path="users/edit/:id" element={<UserForm />} />
         <Route path="users/contacts" element={<ContactsList />} />
-
+        <Route path="admin/profile" element={<AdminProfilePage />} />
 
         {/* Route compétences */}
         <Route path="skills/list" element={<SkillsList />} />
-          <Route path="profile" element={<ProfilePage />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       {/* Gestion root path */}
       <Route
         path="/"
-        element={
-          authenticated ? <Navigate to="/" replace /> : <Navigate to="/login" replace />
-        }
+        element={authenticated ? <Navigate to="/" replace /> : <Navigate to="/login" replace />}
       />
 
       {/* Fallback 404 */}

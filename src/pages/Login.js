@@ -1,27 +1,26 @@
-// src/pages/Login.js
-
 import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
-import axiosInstance from '../services/axiosInstance';
+import authService from '../services/authService'; // votre service authService
+import { useNavigate } from 'react-router-dom';
 
 const { Title } = Typography;
 
 const Login = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();  // Hook pour navigation
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-    const response = await axiosInstance.post('users/login/', {
-  email: values.email,
-  password: values.password
-});
+      const response = await authService.login(values.email, values.password);
 
-      localStorage.setItem('userToken', response.data.token);
-      localStorage.setItem('userRole', response.data.role);
-      localStorage.setItem('userEmail', response.data.email);
-      message.success('Connexion réussie');
-      onLoginSuccess();
+      if (response.token) {
+        message.success('Connexion réussie');
+        onLoginSuccess();
+        navigate('/');  // Redirection vers le dashboard (route index)
+      } else {
+        message.error('Réponse inattendue du serveur');
+      }
     } catch (error) {
       message.error('Email ou mot de passe invalide');
     } finally {

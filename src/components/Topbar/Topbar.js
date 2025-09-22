@@ -1,7 +1,5 @@
-// src/components/Topbar/Topbar.js
-
 import React from 'react';
-import { Layout, Dropdown, Avatar, Space, Badge } from 'antd';
+import { Layout, Dropdown, Avatar, Space, Badge, message } from 'antd';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -9,16 +7,34 @@ import {
   UserOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
+import axiosInstance from '../../services/axiosInstance';  // Adapter chemin axiosInstance
+import { useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
 
 const Topbar = ({ collapsed, onToggleSidebar }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    axiosInstance.post('/users/logout/')
+      .then(() => {
+        // Nettoyage local (token, user, etc.)
+        localStorage.removeItem('userToken');  // Exemple: supprimer token stocké
+        message.success('Déconnexion réussie');
+        navigate('/login');
+      })
+      .catch(err => {
+        console.error('Erreur déconnexion:', err);
+        message.error('Erreur lors de la déconnexion');
+      });
+  };
+
   const menu = (
     <div style={{ padding: 12 }}>
-      <a href="/profile" style={{ display: 'block', marginBottom: 8 }}>
+      <a href="admin/profile" style={{ display: 'block', marginBottom: 8 }}>
         <UserOutlined /> Mon Profil
       </a>
-      <a href="/logout" style={{ display: 'block' }}>
+      <a onClick={handleLogout} style={{ display: 'block', cursor: 'pointer' }}>
         <LogoutOutlined /> Déconnexion
       </a>
     </div>
@@ -43,7 +59,7 @@ const Topbar = ({ collapsed, onToggleSidebar }) => {
           <BellOutlined style={{ fontSize: '18px', cursor: 'pointer' }} />
         </Badge>
 
-        <Dropdown overlay={menu} placement="bottomRight">
+        <Dropdown overlay={menu} placement="bottomRight" trigger={['click']}>
           <Space style={{ cursor: 'pointer' }}>
             <Avatar icon={<UserOutlined />} />
             <span style={{ fontWeight: 600 }}>Utilisateur</span>
