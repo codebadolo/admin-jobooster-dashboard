@@ -88,8 +88,8 @@ const Sidebar = () => {
           <Menu.Item key="users-contacts" onClick={() => navigate('/users/contacts')}>
             Contacts
           </Menu.Item>
-          <Menu.Item key="users-admin" onClick={() => navigate('/users/admin')}>
-            Administration
+          <Menu.Item key="users-cvs" onClick={() => navigate('/users/cvs')}>
+            cvs
           </Menu.Item>
         </Menu.SubMenu>
 

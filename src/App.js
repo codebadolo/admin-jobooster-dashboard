@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import SkillsList from './pages/SkillsList';
 import ContactsList from './pages/ContactsList';
 import AdminProfilePage from './pages/AdminProfilePage';
+import UserCVsPage from './pages/UserCVsPage';
 
 const App = () => {
   // Initialisez l'authentification selon la présence du token
@@ -47,6 +48,7 @@ const App = () => {
         <Route path="users/create" element={<UserForm />} />
         <Route path="users/edit/:id" element={<UserForm />} />
         <Route path="users/contacts" element={<ContactsList />} />
+             <Route path="users/cvs" element={<UserCVsPage />} />
         <Route path="admin/profile" element={<AdminProfilePage />} />
 
         {/* Route compétences */}

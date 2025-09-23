@@ -1,6 +1,7 @@
 import axiosInstance from './axiosInstance';
 
 const API_URL = 'users/';
+const CV_BASE_URL = 'skills/';
 
 export const fetchContacts = () =>
   axiosInstance.get(`${API_URL}contacts/`).then((res) => res.data);
@@ -24,8 +25,9 @@ export const updateProfile = (profileData) =>
 //http://localhost:8000/api/users/api/profile/me/
 export const getCurrentUser = () =>
   axiosInstance.get(`${API_URL}me/`).then((res) => res.data);
+
 export const setCurrentUser = (userData) => {
-  currentUser = userData;
+  getCurrentUser = userData;
   // Stockage local si besoin
   localStorage.setItem('userToken', userData.token || localStorage.getItem('userToken'));
   localStorage.setItem('userRole', userData.role || localStorage.getItem('userRole'));
@@ -39,6 +41,19 @@ export const updateUserProfile = (profileData) => {
       return res.data;
     });
 };
+
+export const fetchCVs = () =>
+axiosInstance.get('skills/users-cvs/').then(res => res.data);
+
+export const createCV = (cvData) =>
+  axiosInstance.post(`${CV_BASE_URL}cvs/`, cvData).then(res => res.data);
+
+export const updateCV = (cvId, cvData) =>
+  axiosInstance.put(`${CV_BASE_URL}cvs/${cvId}/`, cvData).then(res => res.data);
+
+export const deleteCV = (cvId) =>
+  axiosInstance.delete(`${CV_BASE_URL}cvs/${cvId}/`).then(res => res.data);
+
 export default {
   fetchContacts,
   createContact,
@@ -48,4 +63,9 @@ export default {
   updateProfile,
   getCurrentUser ,
     setCurrentUser,
+fetchCVs,
+  createCV,
+  updateCV,
+  deleteCV,
+  updateUserProfile
 };
