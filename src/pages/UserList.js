@@ -100,6 +100,40 @@ const UserList = () => {
       render: (role) => <Tag color={roleColors[role]}>{role}</Tag>,
     },
     {
+  title: 'Sexe',
+  dataIndex: ['profile', 'sex'],
+  key: 'sex',
+  render: (sex) => {
+    switch (sex) {
+      case 'M':
+        return <Tag color="blue">Masculin</Tag>;
+      case 'F':
+        return <Tag color="pink">Féminin</Tag>;
+      case 'O':
+        return <Tag color="purple">Autre</Tag>;
+      default:
+        return <Tag color="default">Inconnu</Tag>;
+    }
+  }
+},
+{
+  title: 'Tranche d\'âge',
+  dataIndex: ['profile', 'age_range'],
+  key: 'age_range',
+  render: (ageRange) => {
+    const map = {
+      under_18: 'Moins de 18 ans',
+      '18_25': '18-25 ans',
+      '26_35': '26-35 ans',
+      '36_50': '36-50 ans',
+      over_50: 'Plus de 50 ans',
+      unknown: '-',
+    };
+    return map[ageRange] || '-';
+  }
+},
+
+    {
       title: 'Disponibilité',
       dataIndex: ['profile', 'availability'],
       key: 'availability',

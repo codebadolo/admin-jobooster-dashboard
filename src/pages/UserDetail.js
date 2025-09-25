@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Layout, Descriptions, Card, Avatar, Spin, message, Row, Col,
-  Statistic, Breadcrumb, Space, Progress, Modal
+  Statistic, Breadcrumb, Space, Progress, Modal, Tag
 } from 'antd';
 import {
   UserOutlined, MailOutlined, GlobalOutlined, CheckCircleOutlined,
@@ -26,6 +26,21 @@ const levelToPercent = {
   debutant: 30,
   intermediaire: 60,
   expert: 90,
+};
+
+const sexLabels = {
+  M: { text: "Masculin", color: 'blue' },
+  F: { text: "Féminin", color: 'pink' },
+  O: { text: "Autre", color: 'purple' },
+};
+
+const ageRangeLabels = {
+  under_18: 'Moins de 18 ans',
+  '18_25': '18-25 ans',
+  '26_35': '26-35 ans',
+  '36_50': '36-50 ans',
+  over_50: 'Plus de 50 ans',
+  unknown: '-',
 };
 
 const UserDetail = () => {
@@ -54,15 +69,13 @@ const UserDetail = () => {
 
   const skills = user.skills || [];
 
-  // Pour ouvrir le modal
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
+  const showModal = () => setIsModalVisible(true);
+  const handleModalCancel = () => setIsModalVisible(false);
 
-  // Pour fermer le modal
-  const handleModalCancel = () => {
-    setIsModalVisible(false);
-  };
+  const sex = user.profile?.sex;
+  const sexLabel = sexLabels[sex] || { text: "Inconnu", color: 'default' };
+  const ageRange = user.profile?.age_range;
+  const ageRangeLabel = ageRangeLabels[ageRange] || '-';
 
   return (
     <Layout style={{ height: '100vh' }}>
@@ -138,8 +151,15 @@ const UserDetail = () => {
         </Layout.Sider>
 
         <Layout.Content style={{ padding: '24px', overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
+
           <Card title="Détails Personnels" bordered style={{ marginBottom: 24 }}>
             <Descriptions size="middle" column={1} bordered>
+              <Descriptions.Item label="Sexe">
+                <Tag color={sexLabel.color}>{sexLabel.text}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Tranche d'âge">
+                {ageRangeLabel}
+              </Descriptions.Item>
               <Descriptions.Item label="Disponibilité">
                 {user.profile?.availability ? 'Disponible' : 'Indisponible'}
               </Descriptions.Item>
@@ -183,7 +203,6 @@ const UserDetail = () => {
             ) : (<p>Aucun CV disponible.</p>)}
           </Card>
 
-          {/* Modal pour la photo en grand */}
           <Modal
             visible={isModalVisible}
             footer={null}
@@ -201,6 +220,7 @@ const UserDetail = () => {
               <Avatar size={200} icon={<UserOutlined />} />
             )}
           </Modal>
+
         </Layout.Content>
       </Layout>
     </Layout>

@@ -12,6 +12,9 @@ import SkillsList from './pages/SkillsList';
 import ContactsList from './pages/ContactsList';
 import AdminProfilePage from './pages/AdminProfilePage';
 import UserCVsPage from './pages/UserCVsPage';
+import MissionsList from './pages/MissionsList';
+import MissionCreate from './pages/MissionCreate';
+import MissionDetail from './pages/MissionDetail';
 
 const App = () => {
   // Initialisez l'authentification selon la présence du token
@@ -50,6 +53,10 @@ const App = () => {
         <Route path="users/contacts" element={<ContactsList />} />
              <Route path="users/cvs" element={<UserCVsPage />} />
         <Route path="admin/profile" element={<AdminProfilePage />} />
+    {/* Missions routes relatives */}
+    <Route path="missions" element={<MissionsList />} />
+    <Route path="missions/create" element={<MissionCreate />} />
+    <Route path="missions/:id" element={<MissionDetail />} />
 
         {/* Route compétences */}
         <Route path="skills/list" element={<SkillsList />} />

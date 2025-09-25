@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Layout, Menu, Tooltip } from 'antd';
 import {
   DashboardOutlined,
@@ -10,6 +10,8 @@ import {
   SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  ProfileOutlined,
+  ProjectOutlined,
 } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -24,7 +26,6 @@ const Sidebar = () => {
     setCollapsed(!collapsed);
   };
 
-  // Mapping pour correspondre path à clé menu exacte
   const pathKeyMap = {
     '/dashboard': 'dashboard',
     '/users': 'users-list',
@@ -38,13 +39,12 @@ const Sidebar = () => {
     '/messaging': 'messaging',
     '/advertising': 'advertising',
     '/settings': 'settings',
+    '/missions': 'missions-list',
+    '/missions/create': 'missions-create',
   };
 
-  // Détermine la clé sélectionnée à partir du pathname exact
   const selectedKey = pathKeyMap[location.pathname] || 'dashboard';
 
-  // Détermine les sous-menus ouverts selon la clé sélectionnée
-  // Exemple simple : map key prefix for submenu open keys
   const openKeyMap = {
     'users-list': 'users',
     'users-contacts': 'users',
@@ -53,6 +53,8 @@ const Sidebar = () => {
     'subscriptions': 'transactions',
     'skills-list': 'skills',
     'user-skills': 'skills',
+    'missions-list': 'missions',
+    'missions-create': 'missions',
   };
   const defaultOpenKeys = [openKeyMap[selectedKey]].filter(Boolean);
 
@@ -89,7 +91,7 @@ const Sidebar = () => {
             Contacts
           </Menu.Item>
           <Menu.Item key="users-cvs" onClick={() => navigate('/users/cvs')}>
-            cvs
+            CVs
           </Menu.Item>
         </Menu.SubMenu>
 
@@ -124,6 +126,19 @@ const Sidebar = () => {
           </Menu.Item>
           <Menu.Item key="user-skills" onClick={() => navigate('/skills/mine')}>
             Mes compétences
+          </Menu.Item>
+        </Menu.SubMenu>
+
+        <Menu.SubMenu
+          key="missions"
+          icon={<ProjectOutlined />}
+          title={!collapsed ? 'Missions' : <Tooltip title="Missions"><ProjectOutlined /></Tooltip>}
+        >
+          <Menu.Item key="missions-list" onClick={() => navigate('/missions')}>
+            Liste des Missions
+          </Menu.Item>
+          <Menu.Item key="missions-create" onClick={() => navigate('/missions/create')}>
+            Créer une Mission
           </Menu.Item>
         </Menu.SubMenu>
 
