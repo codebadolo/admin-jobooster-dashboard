@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Table, Tag, message, Spin, Breadcrumb, Input, Button, Space } from 'antd';
-import { HomeOutlined, FileExcelOutlined, EyeOutlined } from '@ant-design/icons';
+import {
+  Table, Tag, message, Spin, Breadcrumb, Input, Button, Space, Row, Col, Card, Statistic
+} from 'antd';
+import {
+  HomeOutlined, FileExcelOutlined, EyeOutlined,
+  SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 import * as XLSX from 'xlsx';
@@ -35,6 +40,13 @@ const MissionsList = () => {
     fetchMissions();
   }, []);
 
+  // Statistiques
+  const totalMissions = missions.length;
+  const missionsEnCours = missions.filter(m => m.status === 'en_cours').length;
+  const missionsTerminees = missions.filter(m => m.status === 'terminee').length;
+  const missionsAnnulees = missions.filter(m => m.status === 'annulee').length;
+
+  // Recherche globale
   const filteredMissions = useMemo(() => {
     return missions.filter(mission => {
       const search = searchText.toLowerCase();
@@ -46,6 +58,7 @@ const MissionsList = () => {
     });
   }, [missions, searchText]);
 
+  // Export Excel
   const handleExport = () => {
     const dataToExport = filteredMissions.map(({ title, client, prestataire, status, start_date, end_date, price, geographic_zone }) => ({
       Titre: title,
@@ -77,9 +90,7 @@ const MissionsList = () => {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
-        <Button type="link" icon={<EyeOutlined />} onClick={() => navigate(`/missions/${record.id}`)}>
-          Voir Détails
-        </Button>
+        <Button type="link" icon={<EyeOutlined />} onClick={() => navigate(`/missions/${record.id}`)} />
       ),
     },
   ];
@@ -90,12 +101,8 @@ const MissionsList = () => {
         <div style={{ padding: 8 }}>
           <Input placeholder={`Rechercher...`} value={selectedKeys[0]} onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])} onPressEnter={() => confirm()} style={{ marginBottom: 8, display: 'block' }} />
           <Space>
-            <Button type="primary" onClick={() => confirm()} size="small" style={{ width: 90 }}>
-              Rechercher
-            </Button>
-            <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
-              Réinitialiser
-            </Button>
+            <Button type="primary" onClick={() => confirm()} size="small" style={{ width: 90 }}>Rechercher</Button>
+            <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>Réinitialiser</Button>
           </Space>
         </div>
       ),
@@ -116,17 +123,78 @@ const MissionsList = () => {
 
   return (
     <div>
-      <Breadcrumb style={{ margin: '16px 0' }}>
-        <Breadcrumb.Item href="/"><HomeOutlined /></Breadcrumb.Item>
-        <Breadcrumb.Item>Missions</Breadcrumb.Item>
-      </Breadcrumb>
+      <Row align="middle" justify="space-between" style={{ marginBottom: 16 }}>
+        <Col>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/"><HomeOutlined /></Breadcrumb.Item>
+            <Breadcrumb.Item>Missions</Breadcrumb.Item>
+          </Breadcrumb>
+        </Col>
+        <Col>
+          <Space>
+            <Input.Search placeholder="Recherche globale"
+              onChange={e => setSearchText(e.target.value)}
+              allowClear
+              style={{ width: 300 }}
+            />
+            <Button icon={<FileExcelOutlined />} onClick={handleExport} type="primary">
+              Exporter au format Excel
+            </Button>
+          </Space>
+        </Col>
+      </Row>
 
-      <Space style={{ marginBottom: 16, justifyContent: 'space-between', width: '100%' }}>
-        <Input.Search placeholder="Recherche globale" onChange={e => setSearchText(e.target.value)} allowClear style={{ width: 300 }} />
-        <Button icon={<FileExcelOutlined />} onClick={handleExport} type="primary">Exporter au format Excel</Button>
-      </Space>
+      <Row gutter={16} style={{ marginBottom: 20 }}>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Missions totales"
+              value={totalMissions}
+              prefix={<SyncOutlined />}
+              valueStyle={{ color: '#3f8600' }}
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Missions en cours"
+              value={missionsEnCours}
+              prefix={<ClockCircleOutlined />}
+              valueStyle={{ color: '#1890ff' }}
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Missions terminées"
+              value={missionsTerminees}
+              prefix={<CheckCircleOutlined />}
+              valueStyle={{ color: '#52c41a' }}
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Missions annulées"
+              value={missionsAnnulees}
+              prefix={<CloseCircleOutlined />}
+              valueStyle={{ color: '#cf1322' }}
+            />
+          </Card>
+        </Col>
+      </Row>
 
-      <Table columns={columns} dataSource={filteredMissions} rowKey="id" size="middle" loading={loading} pagination={{ pageSize: 10 }} />
+      <Table
+        columns={columns}
+        dataSource={filteredMissions}
+        rowKey="id"
+        size="small"
+        loading={loading}
+        pagination={{ pageSize: 20 }}
+      />
     </div>
   );
 };
