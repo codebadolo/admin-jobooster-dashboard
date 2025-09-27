@@ -76,17 +76,7 @@ const UserCVsPage = () => {
       render: date => (date ? new Date(date).toLocaleDateString() : '-'),
       sorter: (a, b) => new Date(a.uploaded_at) - new Date(b.uploaded_at),
     },
-    {
-      title: 'Photo',
-      key: 'photo',
-      width: 70,
-      render: (_, record) =>
-        record.profile?.photo ? (
-          <Avatar size={40} src={record.profile.photo} />
-        ) : (
-          <Avatar size={40} icon={<HomeOutlined />} />
-        ),
-    },
+
     {
       title: 'Prénom',
       dataIndex: ['profile', 'first_name'],
@@ -120,7 +110,7 @@ const UserCVsPage = () => {
       key: 'file_url',
       render: url => (
         <Button type="link" href={url} target="_blank" icon={<DownloadOutlined />}>
-          Télécharger
+          
         </Button>
       ),
     },

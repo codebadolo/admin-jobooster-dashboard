@@ -288,7 +288,7 @@ const UserList = () => {
         rowKey="id"
         size='small'
         loading={loading}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 15 }}
       />
     </div>
   );
