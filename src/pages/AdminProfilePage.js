@@ -171,9 +171,7 @@ const AdminProfilePage = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ backgroundColor: '#001529' }}>
-        <Title level={3} style={{ color: 'white', margin: '16px 24px' }}>Administration - Profil</Title>
-      </Header>
+      
       <Content style={{ padding: '24px 48px' }}>
         <Breadcrumb style={{ marginBottom: 24 }}>
           <Breadcrumb.Item href="/"><HomeOutlined /></Breadcrumb.Item>

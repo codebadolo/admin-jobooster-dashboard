@@ -5,6 +5,12 @@ const axiosInstance = axios.create({
   timeout: 10000,
 });
 
+axiosInstance.defaults.withCredentials = true;
+
+// Configurations pour CSRF
+axiosInstance.defaults.xsrfCookieName = 'csrftoken';
+axiosInstance.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('userToken');

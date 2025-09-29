@@ -4,20 +4,36 @@ const API_URL = 'http://localhost:8000/api/';  // Base URL de votre API DRF
 
 const getToken = () => localStorage.getItem('userToken');
 
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+};
+
 const axiosInstance = axios.create({
   baseURL: API_URL,
+  timeout: 10000,
+  withCredentials: true,  // Important : permet d'envoyer cookies
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-axiosInstance.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) {
-    config.headers.Authorization = `Token ${token}`;
-  }
-  return config;
-});
+// Ajout de l’interceptor pour injections headers Auth et CSRF
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) {
+      config.headers['Authorization'] = 'Token ' + token;
+    }
+    const csrftoken = getCookie('csrftoken');
+    if (csrftoken) {
+      config.headers['X-CSRFTOKEN'] = csrftoken;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Auth
 const login = async (email, password) => {
@@ -51,56 +67,56 @@ const getCurrentUser = async () => {
 
 // Mise à jour partielle profil (section par section)
 const updateProfilePartial = async (partialData) => {
-  const response = await axiosInstance.patch(`profile/`, partialData);
+  const response = await axiosInstance.patch(`current-user/me/update-profile/`, partialData);
   return response.data;
 };
 
 // Contacts
 const getContacts = async () => {
-  const response = await axiosInstance.get('profile/contacts/');
+  const response = await axiosInstance.get('current-user/me/contacts/');
   return response.data;
 };
 
 const addContact = async (contactData) => {
-  const response = await axiosInstance.post('profile/add_contact/', contactData);
+  const response = await axiosInstance.post('current-user/me/add-contact/', contactData);
   return response.data;
 };
 
 const deleteContact = async (contactId) => {
-  await axiosInstance.delete(`profile/delete_contact/?pk=${contactId}`);
+  await axiosInstance.delete(`current-user/me/delete-contact/?pk=${contactId}`);
 };
 
 // Compétences
 const getSkills = async () => {
-  const response = await axiosInstance.get('profile/skills/');
+  const response = await axiosInstance.get('current-user/me/skills/');
   return response.data;
 };
 
 const addSkill = async (skillData) => {
-  const response = await axiosInstance.post('profile/add_skill/', skillData);
+  const response = await axiosInstance.post('current-user/me/add-skill/', skillData);
   return response.data;
 };
 
 const deleteSkill = async (skillId) => {
-  await axiosInstance.delete(`profile/delete_skill/?pk=${skillId}`);
+  await axiosInstance.delete(`current-user/me/delete-skill/?pk=${skillId}`);
 };
 
 // CVs
 const getCvs = async () => {
-  const response = await axiosInstance.get('profile/cvs/');
+  const response = await axiosInstance.get('current-user/me/cvs/');
   return response.data;
 };
 
+// Pour upload un fichier, cvData doit être un FormData
 const addCv = async (cvData) => {
-  // cvData devrait être un FormData si vous envoyez des fichiers
-  const response = await axiosInstance.post('profile/add_cv/', cvData, {
+  const response = await axiosInstance.post('current-user/me/add-cv/', cvData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
 };
 
 const deleteCv = async (cvId) => {
-  await axiosInstance.delete(`profile/delete_cv/?pk=${cvId}`);
+  await axiosInstance.delete(`users/current-user/me/delete-cv/?pk=${cvId}`);
 };
 
 export default {
