@@ -4,7 +4,7 @@ import {
   Tag, Avatar, Card, Breadcrumb, Row, Col, Statistic
 } from 'antd';
 import {
-  EditOutlined, DeleteOutlined, ExportOutlined, HomeOutlined, UserOutlined,EyeOutlined ,
+  EditOutlined, DeleteOutlined, ExportOutlined, HomeOutlined, UserOutlined, EyeOutlined,
   UserSwitchOutlined, IdcardOutlined
 } from '@ant-design/icons';
 import * as XLSX from 'xlsx';
@@ -26,12 +26,14 @@ const UserList = () => {
 
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get('users/admin-users/');
+      // Appel API admin users (veillez à avoir le bon endpoint dans votre backend)
+      const response = await axiosInstance.get('users/admin/users/');
       const data = Array.isArray(response.data) ? response.data : Object.values(response.data);
       setUsers(data);
     } catch (error) {
@@ -49,13 +51,14 @@ const UserList = () => {
   };
 
   const handleExport = () => {
-    const dataToExport = users.map(({ email, role, is_active, profile }) => ({
+    const dataToExport = users.map(({ email, role, is_active, profile, contacts }) => ({
       Email: email,
       Rôle: role,
       Actif: is_active ? "Oui" : "Non",
       Prénom: profile?.first_name,
       Nom: profile?.last_name,
-      Zone: profile?.geographic_zone,
+      Zone: profile?.coverage_zones?.map(z => z.name).join(', '),
+      Téléphones: (contacts?.filter(c => c.contact_type === 'phone').map(c => c.value).join(', ')) || '-',
     }));
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
@@ -71,6 +74,17 @@ const UserList = () => {
       user.profile?.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
       user.profile?.last_name?.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  const onDelete = async (userId) => {
+    try {
+      await axiosInstance.delete(`admin/users/${userId}/`);
+      message.success('Utilisateur supprimé');
+      fetchUsers();
+    } catch (error) {
+      message.error('Erreur lors de la suppression');
+    }
+  };
+
 
   const columns = [
     {
@@ -100,39 +114,34 @@ const UserList = () => {
       render: (role) => <Tag color={roleColors[role]}>{role}</Tag>,
     },
     {
-  title: 'Sexe',
-  dataIndex: ['profile', 'sex'],
-  key: 'sex',
-  render: (sex) => {
-    switch (sex) {
-      case 'M':
-        return <Tag color="blue">Masculin</Tag>;
-      case 'F':
-        return <Tag color="pink">Féminin</Tag>;
-      case 'O':
-        return <Tag color="purple">Autre</Tag>;
-      default:
-        return <Tag color="default">Inconnu</Tag>;
-    }
-  }
-},
-{
-  title: 'Tranche d\'âge',
-  dataIndex: ['profile', 'age_range'],
-  key: 'age_range',
-  render: (ageRange) => {
-    const map = {
-      under_18: 'Moins de 18 ans',
-      '18_25': '18-25 ans',
-      '26_35': '26-35 ans',
-      '36_50': '36-50 ans',
-      over_50: 'Plus de 50 ans',
-      unknown: '-',
-    };
-    return map[ageRange] || '-';
-  }
-},
-
+      title: 'Sexe',
+      dataIndex: ['profile', 'sex'],
+      key: 'sex',
+      render: (sex) => {
+        switch (sex) {
+          case 'M': return <Tag color="blue">Masculin</Tag>;
+          case 'F': return <Tag color="pink">Féminin</Tag>;
+          case 'O': return <Tag color="purple">Autre</Tag>;
+          default:  return <Tag color="default">Inconnu</Tag>;
+        }
+      }
+    },
+    {
+      title: 'Tranche d\'âge',
+      dataIndex: ['profile', 'age_range'],
+      key: 'age_range',
+      render: (ageRange) => {
+        const map = {
+          under_18: 'Moins de 18 ans',
+          '18_25': '18-25 ans',
+          '26_35': '26-35 ans',
+          '36_50': '36-50 ans',
+          over_50: 'Plus de 50 ans',
+          unknown: '-',
+        };
+        return map[ageRange] || '-';
+      }
+    },
     {
       title: 'Disponibilité',
       dataIndex: ['profile', 'availability'],
@@ -141,10 +150,10 @@ const UserList = () => {
         available ? <Tag color="green">Disponible</Tag> : <Tag color="red">Indisponible</Tag>,
     },
     {
-      title: 'Zone Géographique',
-      dataIndex: ['profile', 'geographic_zone'],
-      key: 'zone',
-      render: (zone) => zone || "-",
+      title: 'Zones de couverture',
+      dataIndex: ['profile', 'coverage_zones'],
+      key: 'coverageZones',
+      render: (zones) => zones?.map(z => <Tag key={z.id}>{z.name}</Tag>) || '-',
     },
     {
       title: 'Abonnement',
@@ -167,48 +176,36 @@ const UserList = () => {
         return phones.map(p => <div key={p.id}>{p.value}</div>);
       }
     },
-{
-  title: 'Actions',
-  key: 'actions',
-  render: (_, record) => (
-    <Space size="middle">
-      <EditOutlined
-        style={{ color: '#1890ff', cursor: 'pointer' }}
-        onClick={() => navigate(`/users/edit/${record.id}`)}
-        title="Modifier"
-      />
-      <EyeOutlined
-        style={{ color: '#52c41a', cursor: 'pointer' }}
-   onClick={() => navigate(`/users/${record.id}`)} // Corrected the path here
-        title="Détail"
-      />
-      <Popconfirm
-        title="Confirmer la suppression ?"
-        onConfirm={() => onDelete(record.id)}
-        okText="Oui"
-        cancelText="Non"
-      >
-        <DeleteOutlined style={{ color: 'red', cursor: 'pointer' }} title="Supprimer" />
-      </Popconfirm>
-    </Space>
-  ),
-}
-
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => (
+        <Space size="middle">
+          <EditOutlined
+            style={{ color: '#1890ff', cursor: 'pointer' }}
+            onClick={() => navigate(`/users/edit/${record.id}`)}
+            title="Modifier"
+          />
+          <EyeOutlined
+            style={{ color: '#52c41a', cursor: 'pointer' }}
+            onClick={() => navigate(`/users/${record.id}`)}
+            title="Détail"
+          />
+          <Popconfirm
+            title="Confirmer la suppression ?"
+            onConfirm={() => onDelete(record.id)}
+            okText="Oui"
+            cancelText="Non"
+          >
+            <DeleteOutlined style={{ color: 'red', cursor: 'pointer' }} title="Supprimer" />
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
-
-  const onDelete = async (userId) => {
-    try {
-      await axiosInstance.delete(`users/${userId}/`);
-      message.success('Utilisateur supprimé');
-      fetchUsers();
-    } catch (error) {
-      message.error('Erreur lors de la suppression');
-    }
-  };
 
   return (
     <div>
-      {/* Ligne avec breadcrumb, export, recherche et ajout utilisateurs */}
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col xs={24} sm={24} md={12} lg={10}>
           <Breadcrumb>
@@ -241,7 +238,6 @@ const UserList = () => {
         </Col>
       </Row>
 
-      {/* Cards en flex, chaque card occupe toute sa largeur */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={8} lg={6}>
           <Card>
@@ -281,7 +277,6 @@ const UserList = () => {
         </Col>
       </Row>
 
-      {/* Table */}
       <Table
         columns={columns}
         dataSource={filteredUsers}

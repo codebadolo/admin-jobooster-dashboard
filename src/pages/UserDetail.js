@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Layout, Descriptions, Card, Avatar, Spin, message, Row, Col,
-  Statistic, Breadcrumb, Space, Progress, Modal, Tag
+  Statistic, Breadcrumb, Tag, Progress, Modal, Rate, Badge
 } from 'antd';
 import {
   UserOutlined, MailOutlined, GlobalOutlined, CheckCircleOutlined,
@@ -11,7 +11,7 @@ import {
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../services/axiosInstance';
 
-const { Header, Content } = Layout;
+const { Header, Content, Sider } = Layout;
 
 const iconByContactType = {
   linkedin: <LinkedinOutlined style={{ color: '#0077b5' }} />,
@@ -22,11 +22,7 @@ const iconByContactType = {
   website: <GlobalOutlined />,
 };
 
-const levelToPercent = {
-  debutant: 30,
-  intermediaire: 60,
-  expert: 90,
-};
+const levelToPercent = { debutant: 30, intermediaire: 60, expert: 90 };
 
 const sexLabels = {
   M: { text: "Masculin", color: 'blue' },
@@ -43,6 +39,21 @@ const ageRangeLabels = {
   unknown: '-',
 };
 
+// Fonction pour label badge selon note moyenne
+const ratingBadge = (rating) => {
+  if (rating >= 4.5) return <Badge status="success" text="Excellent" />;
+  if (rating >= 3.5) return <Badge status="processing" text="Bon" />;
+  if (rating >= 2.5) return <Badge status="warning" text="Moyen" />;
+  return <Badge status="error" text="Faible" />;
+};
+
+// Calcule la moyenne des notes reçues
+const averageRating = (ratings) => {
+  if (ratings.length === 0) return 0;
+  const sum = ratings.reduce((acc, r) => acc + r.rating_value, 0);
+  return sum / ratings.length;
+};
+
 const UserDetail = () => {
   const { id } = useParams();
   const [user, setUser] = useState(null);
@@ -54,8 +65,8 @@ const UserDetail = () => {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`users/admin-users/${id}/`);
-      setUser(response.data);
+      const res = await axiosInstance.get(`users/admin/users/${id}/`);
+      setUser(res.data);
     } catch (error) {
       message.error('Erreur lors du chargement des détails utilisateur');
     } finally {
@@ -67,15 +78,27 @@ const UserDetail = () => {
     return <Spin tip="Chargement..." style={{ display: 'block', marginTop: 100, textAlign: 'center' }} />;
   }
 
-  const skills = user.skills || [];
+  const {
+    profile = {},
+    promotions = [],
+    badges = [],
+    contacts = [],
+    given_ratings = [],
+    received_ratings = [],
+    kyc_documents = [],
+    payment_methods = [],
+  } = user;
+
+  const skills = profile.skills || [];
+  const portfolioRealizations = profile.portfolio?.realisations || [];
+
+  const sex = profile.sex;
+  const sexLabel = sexLabels[sex] || { text: "Inconnu", color: 'default' };
+  const ageRange = profile.age_range;
+  const ageRangeLabel = ageRangeLabels[ageRange] || '-';
 
   const showModal = () => setIsModalVisible(true);
   const handleModalCancel = () => setIsModalVisible(false);
-
-  const sex = user.profile?.sex;
-  const sexLabel = sexLabels[sex] || { text: "Inconnu", color: 'default' };
-  const ageRange = user.profile?.age_range;
-  const ageRangeLabel = ageRangeLabels[ageRange] || '-';
 
   return (
     <Layout style={{ height: '100vh' }}>
@@ -88,87 +111,71 @@ const UserDetail = () => {
       </Header>
 
       <Layout>
-        <Layout.Sider
-          width={320}
-          style={{ background: '#fff', overflow: 'auto', height: 'calc(100vh - 64px)', position: 'sticky', top: 64, padding: 12 }}
-        >
+        <Sider width={320} style={{ background: '#fff', overflow: 'auto', height: 'calc(100vh - 64px)', position: 'sticky', top: 64, padding: 12 }}>
+
           <Card style={{ marginBottom: 16, textAlign: 'center' }}>
-            {user.profile?.photo ? (
-              <img
-                alt="photo-profile"
-                src={user.profile.photo}
-                style={{ width: 120, borderRadius: '50%', cursor: 'pointer' }}
-                onClick={showModal}
-              />
+            {profile.photo ? (
+              <img alt="photo-profil" src={profile.photo} style={{ width: 120, borderRadius: '50%', cursor: 'pointer' }} onClick={showModal} />
             ) : (
               <Avatar size={120} icon={<UserOutlined />} onClick={showModal} style={{ cursor: 'pointer' }} />
             )}
-            <h3 style={{ marginTop: 12 }}>
-              {user.profile?.first_name} {user.profile?.last_name}
-            </h3>
+            <h3 style={{ marginTop: 12 }}>{profile.first_name} {profile.last_name}</h3>
             <p><MailOutlined /> {user.email}</p>
           </Card>
 
           <Card style={{ marginBottom: 16 }}>
-            <Statistic
-              title="Actif"
-              value={user.is_active ? 'Oui' : 'Non'}
-              prefix={<CheckCircleOutlined />}
-              style={{ marginBottom: 16 }}
-            />
-            <Statistic
-              title="Rôle"
-              value={user.role}
-              prefix={<CrownOutlined />}
-              style={{ marginBottom: 16 }}
-            />
-            <Statistic
-              title="Abonnement"
-              value={user.profile?.subscription_status || '-'}
-              prefix={<ProfileOutlined />}
-              style={{ marginBottom: 16 }}
-            />
-            <Statistic
-              title="Vérifié"
-              value={user.profile?.verified_badge ? 'Oui' : 'Non'}
-              prefix={<StarOutlined />}
-            />
+            <Statistic title="Actif" value={user.is_active ? 'Oui' : 'Non'} prefix={<CheckCircleOutlined />} style={{ marginBottom: 16 }} />
+            <Statistic title="Rôle" value={user.role} prefix={<CrownOutlined />} style={{ marginBottom: 16 }} />
+            <Statistic title="Abonnement" value={profile.subscription_status || '-'} prefix={<ProfileOutlined />} style={{ marginBottom: 16 }} />
+            <Statistic title="Vérifié" value={profile.verified_badge ? 'Oui' : 'Non'} prefix={<StarOutlined />} />
           </Card>
 
           <Card size="small" title="Contacts" bordered>
-            {user.contacts && user.contacts.length > 0 ? (
-              user.contacts.map(contact => (
-                <p key={contact.id}>
-                  {iconByContactType[contact.contact_type.toLowerCase()] || <GlobalOutlined />}
-                  {' '}
-                  <b>{contact.contact_type.toUpperCase()}:</b> {contact.value}
-                </p>
-              ))
-            ) : (
-              <p>Aucun contact</p>
-            )}
+            {contacts.length > 0 ? contacts.map(c => (
+              <p key={c.id}>{iconByContactType[c.contact_type.toLowerCase()] || <GlobalOutlined />} <b>{c.contact_type.toUpperCase()}</b>: {c.value}</p>
+            )) : <p>Aucun contact</p>}
           </Card>
-        </Layout.Sider>
 
-        <Layout.Content style={{ padding: '24px', overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
+          <Card size="small" title="Badges" bordered style={{ marginTop: 16 }}>
+            {badges.length > 0 ? badges.map(b => (
+              <p key={b.id}>{b.badge_type_display} ({new Date(b.awarded_at).toLocaleDateString()})</p>
+            )) : <p>Aucun badge</p>}
+          </Card>
 
-          <Card title="Détails Personnels" bordered style={{ marginBottom: 24 }}>
+          <Card size="small" title="Promotions" bordered style={{ marginTop: 16 }}>
+            {promotions.length > 0 ? promotions.map(p => (
+              <p key={p.id}>{p.description} - {p.discount_percentage}% ({new Date(p.start_datetime).toLocaleDateString()} à {new Date(p.end_datetime).toLocaleDateString()})</p>
+            )) : <p>Aucune promotion</p>}
+          </Card>
+
+          <Card size="small" title="Documents KYC" bordered style={{ marginTop: 16 }}>
+            {kyc_documents.length > 0 ? kyc_documents.map(doc => (
+              <p key={doc.id}>
+                <b>{doc.document_type_display || doc.document_type}</b> - {doc.document_file ? (<a href={doc.document_file} target="_blank" rel="noopener noreferrer">Voir document</a>) : 'Pas de fichier'}<br />
+                Vérifié: {doc.verified ? 'Oui' : 'Non'}<br />
+                Vérifié par: {doc.verified_by_email || '-'}<br />
+                Date de vérification: {doc.verified_at ? new Date(doc.verified_at).toLocaleDateString() : '-'}
+              </p>
+            )) : <p>Aucun document KYC disponible.</p>}
+          </Card>
+
+          <Card size="small" title="Méthodes de paiement" bordered style={{ marginTop: 16 }}>
+            {payment_methods.length > 0 ? payment_methods.map(pm => (
+              <p key={pm.id}><b>{pm.payment_type_display || pm.payment_type}</b> - Téléphone: {pm.phone_number} {pm.is_primary ? '(Principal)' : ''}</p>
+            )) : <p>Aucune méthode de paiement disponible.</p>}
+          </Card>
+
+        </Sider>
+
+        <Content style={{ padding: 24, overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
+          <Card title="Détails personnels" bordered style={{ marginBottom: 24 }}>
             <Descriptions size="middle" column={1} bordered>
-              <Descriptions.Item label="Sexe">
-                <Tag color={sexLabel.color}>{sexLabel.text}</Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Tranche d'âge">
-                {ageRangeLabel}
-              </Descriptions.Item>
-              <Descriptions.Item label="Disponibilité">
-                {user.profile?.availability ? 'Disponible' : 'Indisponible'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Zone Géographique">
-                <GlobalOutlined /> {user.profile?.geographic_zone || '-'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Biographie">
-                <ReadOutlined /> {user.profile?.bio || '-'}
-              </Descriptions.Item>
+              <Descriptions.Item label="Sexe"><Tag color={sexLabel.color}>{sexLabel.text}</Tag></Descriptions.Item>
+              <Descriptions.Item label="Tranche d'âge">{ageRangeLabel}</Descriptions.Item>
+              <Descriptions.Item label="Disponibilité">{profile.availability ? 'Disponible' : 'Indisponible'}</Descriptions.Item>
+              <Descriptions.Item label="Zones de couverture">{profile.coverage_zones?.map(z => <Tag key={z.id}>{z.name}</Tag>) || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Biographie"><ReadOutlined /> {profile.bio || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Localisation">{profile.location || '-'}</Descriptions.Item>
             </Descriptions>
           </Card>
 
@@ -190,38 +197,47 @@ const UserDetail = () => {
             )}
           </Card>
 
-          <Card title="CVs" bordered>
-            {user.profile?.cvs && user.profile.cvs.length > 0 ? (
-              user.profile.cvs.map(cv => (
-                <p key={cv.id}>
-                  <a href={cv.file_url} target="_blank" rel="noopener noreferrer">
-                    {cv.description || "CV sans description"} - Télécharger
-                  </a>{' '}
-                  <small>({new Date(cv.uploaded_at).toLocaleDateString()})</small>
-                </p>
-              ))
-            ) : (<p>Aucun CV disponible.</p>)}
+          <Card title="Ratings donnés" bordered style={{ marginBottom: 24 }}>
+            {given_ratings.length > 0 ? given_ratings.map(r => (
+              <div key={r.id} style={{ marginBottom: 12 }}>
+                <Rate disabled defaultValue={r.rating_value} />
+                <p>{r.comment || '-'}</p>
+                <small>Note donnée à : {r.rated_email}</small>
+              </div>
+            )) : <p>Aucun rating donné.</p>}
           </Card>
 
-          <Modal
-            visible={isModalVisible}
-            footer={null}
-            onCancel={handleModalCancel}
-            centered
-            bodyStyle={{ padding: 0, textAlign: 'center' }}
-          >
-            {user.profile?.photo ? (
-              <img
-                alt="photo-profile-full"
-                src={user.profile.photo}
-                style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain' }}
-              />
+          <Card title="Ratings reçus" bordered style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 16 }}>
+              <Rate disabled allowHalf value={averageRating(received_ratings)} />
+              {ratingBadge(averageRating(received_ratings))}
+              <p>Moyenne de {received_ratings.length} évaluations</p>
+            </div>
+            {received_ratings.length > 0 ? received_ratings.map(r => (
+              <div key={r.id} style={{ marginBottom: 12 }}>
+                <Rate disabled defaultValue={r.rating_value} />
+                <p>{r.comment || '-'}</p>
+                <small>Note donnée par : {r.rater_email}</small>
+              </div>
+            )) : <p>Aucun rating reçu.</p>}
+          </Card>
+
+          <Card title="Portfolio - Réalisations" bordered>
+            {portfolioRealizations.length > 0 ? portfolioRealizations.map(r => (
+              <p key={r.id}><b>{r.title}</b>: {r.description}</p>
+            )) : (
+              <p>Aucune réalisation disponible.</p>
+            )}
+          </Card>
+
+          <Modal visible={isModalVisible} footer={null} onCancel={handleModalCancel} centered bodyStyle={{ padding: 0, textAlign: 'center' }}>
+            {profile.photo ? (
+              <img alt="photo-profil-plein" src={profile.photo} style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain' }} />
             ) : (
               <Avatar size={200} icon={<UserOutlined />} />
             )}
           </Modal>
-
-        </Layout.Content>
+        </Content>
       </Layout>
     </Layout>
   );

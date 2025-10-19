@@ -15,6 +15,10 @@ import UserCVsPage from './pages/UserCVsPage';
 import MissionsList from './pages/MissionsList';
 import MissionCreate from './pages/MissionCreate';
 import MissionDetail from './pages/MissionDetail';
+import KycManagement from './pages/KycManagement';
+import CampaignsPage from './pages/CampaignsPage';
+import PromotionsPage from './pages/PromotionsPage';
+import SkillsManagement from './pages/SkillsManagement';
 
 const App = () => {
   // Initialisez l'authentification selon la présence du token
@@ -54,11 +58,12 @@ const App = () => {
              <Route path="users/cvs" element={<UserCVsPage />} />
         <Route path="admin/profile" element={<AdminProfilePage />} />
     {/* Missions routes relatives */}
-    <Route path="missions" element={<MissionsList />} />
-    <Route path="missions/create" element={<MissionCreate />} />
-    <Route path="missions/:id" element={<MissionDetail />} />
+<Route path="campaigns" element={<CampaignsPage />} />
 
+  <Route path="users/kyc" element={<KycManagement />} /> {/* Nouvelle route KYC */}
+    <Route path="skills/manage" element={<SkillsManagement />} />
         {/* Route compétences */}
+          <Route path="users/promotions" element={<PromotionsPage />} /> 
         <Route path="skills/list" element={<SkillsList />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>
