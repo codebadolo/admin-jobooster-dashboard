@@ -19,7 +19,11 @@ import KycManagement from './pages/KycManagement';
 import CampaignsPage from './pages/CampaignsPage';
 import PromotionsPage from './pages/PromotionsPage';
 import SkillsManagement from './pages/SkillsManagement';
+import CampaignsList from './pages/CampaignsList';
+import CampaignDetail from './pages/CampaignDetail';
+import CampaignPerformance from './pages/CampaignPerformance';
 
+import CampaignDetailEdit from './pages/CampaignDetailEdit';
 const App = () => {
   // Initialisez l'authentification selon la présence du token
   const [authenticated, setAuthenticated] = useState(!!localStorage.getItem('userToken'));
@@ -41,24 +45,23 @@ const App = () => {
         path="/login" 
         element={<Login onLoginSuccess={handleLoginSuccess} />} 
       />
+<Route
+  path="/*"
+  element={authenticated ? <MainLayout onLogout={handleLogout} /> : <Navigate to="/login" replace />}
+>
 
-      <Route
-        path="/*"
-        element={authenticated ? <MainLayout onLogout={handleLogout} /> : <Navigate to="/login" replace />}
-      >
         {/* Route index = / */}
         <Route index element={<Dashboard />} />
-
         {/* Routes utilisateurs */}
         <Route path="users" element={<UserList />} />
         <Route path="users/:id" element={<UserDetail />} />
         <Route path="users/create" element={<UserForm />} />
         <Route path="users/edit/:id" element={<UserForm />} />
         <Route path="users/contacts" element={<ContactsList />} />
-             <Route path="users/cvs" element={<UserCVsPage />} />
+        <Route path="users/cvs" element={<UserCVsPage />} />
         <Route path="admin/profile" element={<AdminProfilePage />} />
     {/* Missions routes relatives */}
-<Route path="campaigns" element={<CampaignsPage />} />
+  
 
   <Route path="users/kyc" element={<KycManagement />} /> {/* Nouvelle route KYC */}
     <Route path="skills/manage" element={<SkillsManagement />} />
@@ -66,8 +69,13 @@ const App = () => {
           <Route path="users/promotions" element={<PromotionsPage />} /> 
         <Route path="skills/list" element={<SkillsList />} />
         <Route path="profile" element={<ProfilePage />} />
-      </Route>
+          <Route path="campaigns" element={<CampaignsList />} />
+<Route path="campaigns/create" element={<CampaignDetailEdit />} />
+<Route path="campaigns/:id" element={<CampaignDetail />} />
+<Route path="campaign-performance" element={<CampaignPerformance />} />
 
+      </Route>
+  
       {/* Gestion root path */}
       <Route
         path="/"
