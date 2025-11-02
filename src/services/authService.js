@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/';  // Base URL de votre API DRF
+const API_URL = 'https://api.ibaara.com/api/';  // Base URL de votre API DRF
 
 const getToken = () => localStorage.getItem('userToken');
 
