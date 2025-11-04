@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://api.ibaara.com/api',
+ // baseURL: 'https://api.ibaara.com/api',
+   baseURL: 'http://localhost:8000/api',
   timeout: 10000,
 });
 

@@ -13,17 +13,17 @@ const MainLayout = () => {
     setCollapsed(!collapsed);
   };
 
+  // Largeur sidebar selon collapsed
+  const sidebarWidth = collapsed ? 80 : 220;
+
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      {/* Sidebar latérale, collapsible */}
+    <Layout>
       <Sidebar collapsed={collapsed} />
 
-      {/* Partie principale : barre du haut + contenu */}
-      <Layout>
+      <Layout style={{ marginLeft: sidebarWidth, minHeight: '100vh' }}>
         <Topbar collapsed={collapsed} onToggleSidebar={toggleSidebar} />
 
-        <Content style={{ margin: 16, padding: 24, background: '#fff', minHeight: 280 }}>
-          {/* Le contenu rendu par React Router selon la route (Dashboard, Users, etc) */}
+        <Content style={{ marginTop: 64, padding: 24, background: '#fff', minHeight: 'calc(100vh - 64px)', overflowY: 'auto' }}>
           <Outlet />
         </Content>
       </Layout>

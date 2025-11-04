@@ -39,7 +39,6 @@ const ageRangeLabels = {
   unknown: '-',
 };
 
-// Fonction pour label badge selon note moyenne
 const ratingBadge = (rating) => {
   if (rating >= 4.5) return <Badge status="success" text="Excellent" />;
   if (rating >= 3.5) return <Badge status="processing" text="Bon" />;
@@ -47,9 +46,8 @@ const ratingBadge = (rating) => {
   return <Badge status="error" text="Faible" />;
 };
 
-// Calcule la moyenne des notes reçues
 const averageRating = (ratings) => {
-  if (ratings.length === 0) return 0;
+  if (!ratings || ratings.length === 0) return 0;
   const sum = ratings.reduce((acc, r) => acc + r.rating_value, 0);
   return sum / ratings.length;
 };
@@ -79,7 +77,7 @@ const UserDetail = () => {
   }
 
   const {
-    profile = {},
+    profile,
     promotions = [],
     badges = [],
     contacts = [],
@@ -87,14 +85,14 @@ const UserDetail = () => {
     received_ratings = [],
     kyc_documents = [],
     payment_methods = [],
-  } = user;
+  } = user || {};
 
-  const skills = profile.skills || [];
-  const portfolioRealizations = profile.portfolio?.realisations || [];
-
-  const sex = profile.sex;
+  // Sécuriser l'accès aux objets imbriqués
+  const skills = profile?.skills || [];
+  const portfolioRealizations = profile?.portfolio?.realisations || [];
+  const sex = profile?.sex;
   const sexLabel = sexLabels[sex] || { text: "Inconnu", color: 'default' };
-  const ageRange = profile.age_range;
+  const ageRange = profile?.age_range;
   const ageRangeLabel = ageRangeLabels[ageRange] || '-';
 
   const showModal = () => setIsModalVisible(true);
@@ -112,27 +110,26 @@ const UserDetail = () => {
 
       <Layout>
         <Sider width={320} style={{ background: '#fff', overflow: 'auto', height: 'calc(100vh - 64px)', position: 'sticky', top: 64, padding: 12 }}>
-
           <Card style={{ marginBottom: 16, textAlign: 'center' }}>
-            {profile.photo ? (
+            {profile?.photo ? (
               <img alt="photo-profil" src={profile.photo} style={{ width: 120, borderRadius: '50%', cursor: 'pointer' }} onClick={showModal} />
             ) : (
               <Avatar size={120} icon={<UserOutlined />} onClick={showModal} style={{ cursor: 'pointer' }} />
             )}
-            <h3 style={{ marginTop: 12 }}>{profile.first_name} {profile.last_name}</h3>
-            <p><MailOutlined /> {user.email}</p>
+            <h3 style={{ marginTop: 12 }}>{profile?.first_name || '-'} {profile?.last_name || '-'}</h3>
+            <p><MailOutlined /> {user?.email || '-'}</p>
           </Card>
 
           <Card style={{ marginBottom: 16 }}>
             <Statistic title="Actif" value={user.is_active ? 'Oui' : 'Non'} prefix={<CheckCircleOutlined />} style={{ marginBottom: 16 }} />
-            <Statistic title="Rôle" value={user.role} prefix={<CrownOutlined />} style={{ marginBottom: 16 }} />
-            <Statistic title="Abonnement" value={profile.subscription_status || '-'} prefix={<ProfileOutlined />} style={{ marginBottom: 16 }} />
-            <Statistic title="Vérifié" value={profile.verified_badge ? 'Oui' : 'Non'} prefix={<StarOutlined />} />
+            <Statistic title="Rôle" value={user.role || '-'} prefix={<CrownOutlined />} style={{ marginBottom: 16 }} />
+            <Statistic title="Abonnement" value={profile?.subscription_status || '-'} prefix={<ProfileOutlined />} style={{ marginBottom: 16 }} />
+            <Statistic title="Vérifié" value={profile?.verified_badge ? 'Oui' : 'Non'} prefix={<StarOutlined />} />
           </Card>
 
           <Card size="small" title="Contacts" bordered>
             {contacts.length > 0 ? contacts.map(c => (
-              <p key={c.id}>{iconByContactType[c.contact_type.toLowerCase()] || <GlobalOutlined />} <b>{c.contact_type.toUpperCase()}</b>: {c.value}</p>
+              <p key={c.id}>{iconByContactType[c.contact_type?.toLowerCase()] || <GlobalOutlined />} <b>{c.contact_type?.toUpperCase()}</b>: {c.value}</p>
             )) : <p>Aucun contact</p>}
           </Card>
 
@@ -164,7 +161,6 @@ const UserDetail = () => {
               <p key={pm.id}><b>{pm.payment_type_display || pm.payment_type}</b> - Téléphone: {pm.phone_number} {pm.is_primary ? '(Principal)' : ''}</p>
             )) : <p>Aucune méthode de paiement disponible.</p>}
           </Card>
-
         </Sider>
 
         <Content style={{ padding: 24, overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
@@ -172,10 +168,10 @@ const UserDetail = () => {
             <Descriptions size="middle" column={1} bordered>
               <Descriptions.Item label="Sexe"><Tag color={sexLabel.color}>{sexLabel.text}</Tag></Descriptions.Item>
               <Descriptions.Item label="Tranche d'âge">{ageRangeLabel}</Descriptions.Item>
-              <Descriptions.Item label="Disponibilité">{profile.availability ? 'Disponible' : 'Indisponible'}</Descriptions.Item>
-              <Descriptions.Item label="Zones de couverture">{profile.coverage_zones?.map(z => <Tag key={z.id}>{z.name}</Tag>) || '-'}</Descriptions.Item>
-              <Descriptions.Item label="Biographie"><ReadOutlined /> {profile.bio || '-'}</Descriptions.Item>
-              <Descriptions.Item label="Localisation">{profile.location || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Disponibilité">{profile?.availability ? 'Disponible' : 'Indisponible'}</Descriptions.Item>
+              <Descriptions.Item label="Zones de couverture">{profile?.coverage_zones?.map(z => <Tag key={z.id}>{z.name}</Tag>) || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Biographie"><ReadOutlined /> {profile?.bio || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Localisation">{profile?.location || '-'}</Descriptions.Item>
             </Descriptions>
           </Card>
 
@@ -231,7 +227,7 @@ const UserDetail = () => {
           </Card>
 
           <Modal visible={isModalVisible} footer={null} onCancel={handleModalCancel} centered bodyStyle={{ padding: 0, textAlign: 'center' }}>
-            {profile.photo ? (
+            {profile?.photo ? (
               <img alt="photo-profil-plein" src={profile.photo} style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain' }} />
             ) : (
               <Avatar size={200} icon={<UserOutlined />} />

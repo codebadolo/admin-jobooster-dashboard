@@ -18,8 +18,7 @@ const Topbar = ({ collapsed, onToggleSidebar }) => {
   const handleLogout = () => {
     axiosInstance.post('/users/logout/')
       .then(() => {
-        // Nettoyage local (token, user, etc.)
-        localStorage.removeItem('userToken');  // Exemple: supprimer token stocké
+        localStorage.removeItem('userToken');
         message.success('Déconnexion réussie');
         navigate('/login');
       })
@@ -42,13 +41,19 @@ const Topbar = ({ collapsed, onToggleSidebar }) => {
 
   return (
     <Header style={{
+      position: 'fixed',
+      top: 0,
+      left: collapsed ? 80 : 220,
+      right: 0,
+      height: 64,
+      zIndex: 1100,
       padding: '0 16px',
       backgroundColor: '#fff',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       boxShadow: '0 1px 4px rgba(0,21,41,.08)',
-      zIndex: 1000,
+      transition: 'left 0.3s',
     }}>
       <div onClick={onToggleSidebar} style={{ cursor: 'pointer', fontSize: 20 }}>
         {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}

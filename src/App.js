@@ -22,8 +22,10 @@ import SkillsManagement from './pages/SkillsManagement';
 import CampaignsList from './pages/CampaignsList';
 import CampaignDetail from './pages/CampaignDetail';
 import CampaignPerformance from './pages/CampaignPerformance';
-
+import TransactionList from './pages/TransactionList';
+import TransactionDetail from './pages/TransactionDetail';
 import CampaignDetailEdit from './pages/CampaignDetailEdit';
+import AdminTransactionList from './pages/TransactionList';
 const App = () => {
   // Initialisez l'authentification selon la présence du token
   const [authenticated, setAuthenticated] = useState(!!localStorage.getItem('userToken'));
@@ -62,6 +64,8 @@ const App = () => {
         <Route path="admin/profile" element={<AdminProfilePage />} />
     {/* Missions routes relatives */}
   
+<Route path="transactions/list" element={<AdminTransactionList />} />
+<Route path="transactions/:id" element={<TransactionDetail />} />
 
   <Route path="users/kyc" element={<KycManagement />} /> {/* Nouvelle route KYC */}
     <Route path="skills/manage" element={<SkillsManagement />} />

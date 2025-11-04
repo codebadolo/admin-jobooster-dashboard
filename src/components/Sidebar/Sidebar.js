@@ -22,24 +22,22 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 const { Sider } = Layout;
 
-const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+const Sidebar = ({ collapsed, setCollapsed }) => {
   const [openKeys, setOpenKeys] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Mapping de chemins vers clés
+  // Mapping chemins vers clés des menus
   const pathMap = {
     '/dashboard': 'dashboard',
     '/users': 'users-list',
-    '/users/contacts': 'users-contacts',
-    '/users/cvs': 'users-cvs',
+
     '/users/kyc': 'users-kyc',
     '/users/promotions': 'users-promotions',
     '/users/payments': 'users-payments',
     '/transactions/list': 'transactions-list',
     '/subscriptions': 'subscriptions',
-    '/ratings': 'ratings',
+
     '/campaigns': 'campaigns',
     '/skills/manage': 'skills-manage',
     '/skills/list': 'skills-list',
@@ -48,10 +46,8 @@ const Sidebar = () => {
     '/settings': 'settings',
   };
 
-  // Définir la clé sélectionnée
   const selectedKey = pathMap[location.pathname] || 'dashboard';
 
-  // Définir les clés ouvertes basées sur la sélection
   useEffect(() => {
     const openKey = (() => {
       if (selectedKey.startsWith('users')) return ['users'];
@@ -62,7 +58,6 @@ const Sidebar = () => {
     setOpenKeys(openKey);
   }, [selectedKey]);
 
-  const toggleCollapsed = () => setCollapsed(!collapsed);
   const handleOpenChange = (keys) => setOpenKeys(keys);
 
   const renderMenuItem = (key, icon, label) => (
@@ -76,9 +71,18 @@ const Sidebar = () => {
       trigger={null}
       collapsible
       collapsed={collapsed}
-      width={220}
+      width={230}
       theme="dark"
-      style={{ transition: 'width 0.3s' }}
+      style={{
+        position: 'fixed',
+        height: '100vh',
+        left: 0,
+        top: 0,
+        bottom: 0,
+      
+        zIndex: 1000,
+        transition: 'width 0.3s',
+      }}
     >
       <div className="logo" style={{ height: 40, margin: 16, background: 'rgba(255, 255, 255, 0.3)' }} />
 
@@ -95,25 +99,17 @@ const Sidebar = () => {
         <Menu.SubMenu
           key="users"
           icon={<UserOutlined />}
-          title={!collapsed ? 'Utilisateurs' : <Tooltip placement="right" title="Utilisateurs"><UserOutlined /></Tooltip>}
+          title={!collapsed ? 'Utilisateurs' :
+            <Tooltip placement="right" title="Utilisateurs"><UserOutlined /></Tooltip>}
         >
           <Menu.Item key="users" onClick={() => navigate('/users')}>
             Liste des Utilisateurs
-          </Menu.Item>
-          <Menu.Item key="users/contacts" icon={<ContactsOutlined />} onClick={() => navigate('/users/contacts')}>
-            Contacts
-          </Menu.Item>
-          <Menu.Item key="users/cvs" onClick={() => navigate('/users/cvs')}>
-            CVs
           </Menu.Item>
           <Menu.Item key="users/kyc" icon={<FileDoneOutlined />} onClick={() => navigate('/users/kyc')}>
             Vérifications KYC
           </Menu.Item>
           <Menu.Item key="users/promotions" icon={<TagsOutlined />} onClick={() => navigate('/users/promotions')}>
             Promotions
-          </Menu.Item>
-          <Menu.Item key="users/payments" icon={<CreditCardOutlined />} onClick={() => navigate('/users/payments')}>
-            Méthodes de paiement
           </Menu.Item>
         </Menu.SubMenu>
 
@@ -124,7 +120,8 @@ const Sidebar = () => {
         <Menu.SubMenu
           key="transactions"
           icon={<WalletOutlined />}
-          title={!collapsed ? 'Transactions' : <Tooltip placement="right" title="Transactions"><WalletOutlined /></Tooltip>}
+          title={!collapsed ? 'Transactions' :
+            <Tooltip placement="right" title="Transactions"><WalletOutlined /></Tooltip>}
         >
           <Menu.Item key="transactions/list" onClick={() => navigate('/transactions/list')}>
             Historique Paiements
@@ -134,14 +131,11 @@ const Sidebar = () => {
           </Menu.Item>
         </Menu.SubMenu>
 
-        <Menu.Item key="ratings" icon={<StarOutlined />} onClick={() => navigate('/ratings')}>
-          {!collapsed ? 'Évaluations' : <Tooltip placement="right" title="Évaluations"><StarOutlined /></Tooltip>}
-        </Menu.Item>
-
         <Menu.SubMenu
           key="skills"
           icon={<AppstoreOutlined />}
-          title={!collapsed ? 'Compétences' : <Tooltip placement="right" title="Compétences"><AppstoreOutlined /></Tooltip>}
+          title={!collapsed ? 'Compétences' :
+            <Tooltip placement="right" title="Compétences"><AppstoreOutlined /></Tooltip>}
         >
           <Menu.Item key="skills/list" onClick={() => navigate('/skills/list')}>
             Catalogue
@@ -166,17 +160,34 @@ const Sidebar = () => {
 
       <Divider style={{ background: '#444', margin: 'auto 12px 12px' }} />
 
-      {/* Espace profil en bas */}
-      <div style={{ position: 'absolute', bottom: 16, width: '100%', textAlign: 'center' }}>
-        <Avatar size={collapsed ? 32 : 40} icon={<UserOutlined />} onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }} />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 16,
+          width: '100%',
+          textAlign: 'center',
+          padding: '0 12px',
+        }}
+      >
+        <Avatar
+          size={collapsed ? 32 : 40}
+          icon={<UserOutlined />}
+          onClick={() => navigate('/profile')}
+          style={{ cursor: 'pointer' }}
+        />
         {!collapsed && (
-          <div style={{ color: '#fff', marginTop: 8, cursor: 'pointer' }} onClick={() => { localStorage.clear(); navigate('/login'); }} title="Déconnexion">
+          <div
+            style={{ color: '#fff', marginTop: 8, cursor: 'pointer' }}
+            onClick={() => {
+              localStorage.clear();
+              navigate('/login');
+            }}
+            title="Déconnexion"
+          >
             <LogoutOutlined /> Déconnexion
           </div>
         )}
-        <div style={{ paddingTop: 8, cursor: 'pointer', color: '#fff' }} onClick={toggleCollapsed} title={collapsed ? 'Dérouler le menu' : 'Réduire le menu'}>
-          {collapsed ? <MenuUnfoldOutlined style={{ fontSize: 20 }} /> : <MenuFoldOutlined style={{ fontSize: 20 }} />}
-        </div>
+    
       </div>
     </Sider>
   );

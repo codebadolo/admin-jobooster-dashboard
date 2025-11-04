@@ -2,7 +2,7 @@ import axiosInstance from './axiosInstance';
 
 const API_BASE = 'users/'; // base API users
 const ADMIN_BASE = `${API_BASE}admin/`;
-const SKILLS_BASE = 'skills/';
+const SKILLS_BASE = `${API_BASE}skills/`;
 
 // -------- Contacts --------
 
