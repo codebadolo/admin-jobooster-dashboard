@@ -7,7 +7,8 @@ import {
   UserOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
-import axiosInstance from '../../services/axiosInstance';  // Adapter chemin axiosInstance
+import axiosInstance from '../../api/axiosInstance';
+
 import { useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
@@ -30,7 +31,7 @@ const Topbar = ({ collapsed, onToggleSidebar }) => {
 
   const menu = (
     <div style={{ padding: 12 }}>
-      <a href="admin/profile" style={{ display: 'block', marginBottom: 8 }}>
+      <a href="admin/profile" style={{ display: 'block', marginBottom: 30 }}>
         <UserOutlined /> Mon Profil
       </a>
       <a onClick={handleLogout} style={{ display: 'block', cursor: 'pointer' }}>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, Select, message } from 'antd';
-import axiosInstance from '../services/axiosInstance';
+import axiosInstance from '../../api/axiosInstance';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const { Option } = Select;

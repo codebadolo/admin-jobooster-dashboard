@@ -9,7 +9,8 @@ import {
 } from '@ant-design/icons';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import axiosInstance from '../services/axiosInstance';
+import axiosInstance from '../../api/axiosInstance';
+
 import { useNavigate } from 'react-router-dom';
 
 const roleColors = {

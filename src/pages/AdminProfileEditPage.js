@@ -7,7 +7,7 @@ import {
   UserOutlined, ProfileOutlined, MailOutlined, TeamOutlined, CheckCircleOutlined,
   CalendarOutlined
 } from '@ant-design/icons';
-import userService from '../services/userService'; // Assurez-vous que userService a updateUser
+import userService from '../api/userService'; // Assurez-vous que userService a updateUser
 
 const { Title, Text, Paragraph } = Typography;
 

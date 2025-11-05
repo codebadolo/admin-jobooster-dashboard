@@ -1,194 +1,70 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Tooltip, Avatar, Divider } from 'antd';
-import {
-  DashboardOutlined,
-  UserOutlined,
-  ProjectOutlined,
-  WalletOutlined,
-  StarOutlined,
-  MessageOutlined,
-  NotificationOutlined,
-  SettingOutlined,
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
-  ContactsOutlined,
-  FileDoneOutlined,
-  TagsOutlined,
-  CreditCardOutlined,
-  LogoutOutlined,
-  AppstoreOutlined
-} from '@ant-design/icons';
-import { useLocation, useNavigate } from 'react-router-dom';
+// src/components/Sidebar/Sidebar.js
+import React, { useState } from 'react';
+import { Layout, Menu } from 'antd';
+import { useNavigate, useLocation } from 'react-router-dom';
+import menuItems from './menuItems';
 
 const { Sider } = Layout;
 
-const Sidebar = ({ collapsed, setCollapsed }) => {
-  const [openKeys, setOpenKeys] = useState([]);
-  const location = useLocation();
+const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
-  // Mapping chemins vers clés des menus
-  const pathMap = {
-    '/dashboard': 'dashboard',
-    '/users': 'users-list',
+  const selectedKey = menuItems
+    .flatMap(item => (item.children ? item.children : item))
+    .find(sub => sub.path === location.pathname)?.key;
 
-    '/users/kyc': 'users-kyc',
-    '/users/promotions': 'users-promotions',
-    '/users/payments': 'users-payments',
-    '/transactions/list': 'transactions-list',
-    '/subscriptions': 'subscriptions',
-
-    '/campaigns': 'campaigns',
-    '/skills/manage': 'skills-manage',
-    '/skills/list': 'skills-list',
-    '/messaging': 'messaging',
-    '/advertising': 'advertising',
-    '/settings': 'settings',
+  const onMenuClick = ({ key }) => {
+    const target = menuItems
+      .flatMap(item => (item.children ? item.children : item))
+      .find(sub => sub.key === key);
+    if (target?.path) navigate(target.path);
   };
 
-  const selectedKey = pathMap[location.pathname] || 'dashboard';
-
-  useEffect(() => {
-    const openKey = (() => {
-      if (selectedKey.startsWith('users')) return ['users'];
-      if (selectedKey.startsWith('transactions') || selectedKey.startsWith('subscriptions')) return ['transactions'];
-      if (selectedKey.startsWith('skills')) return ['skills'];
-      return [];
-    })();
-    setOpenKeys(openKey);
-  }, [selectedKey]);
-
-  const handleOpenChange = (keys) => setOpenKeys(keys);
-
-  const renderMenuItem = (key, icon, label) => (
-    <Menu.Item key={key} icon={icon} onClick={() => navigate(`/${key.replace(/-/g, '/')}`)}>
-      {!collapsed ? label : <Tooltip placement="right" title={label}>{icon}</Tooltip>}
-    </Menu.Item>
-  );
+  const generateMenuItems = (items) =>
+    items.map(item => ({
+      key: item.key,
+      icon: item.icon,
+      label: item.label,
+      children: item.children ? generateMenuItems(item.children) : null,
+    }));
 
   return (
     <Sider
-      trigger={null}
       collapsible
       collapsed={collapsed}
+      onCollapse={setCollapsed}
       width={230}
-      theme="dark"
       style={{
-        position: 'fixed',
-        height: '100vh',
-        left: 0,
-        top: 0,
-        bottom: 0,
-      
-        zIndex: 1000,
-        transition: 'width 0.3s',
+        minHeight: '100vh',
+        background: '#fff',
+        borderRight: '1px solid #f0f0f0',
       }}
     >
-      <div className="logo" style={{ height: 40, margin: 16, background: 'rgba(255, 255, 255, 0.3)' }} />
-
-      <Menu
-        theme="dark"
-        mode="inline"
-        selectedKeys={[selectedKey]}
-        openKeys={openKeys}
-        onOpenChange={handleOpenChange}
-        style={{ height: 'calc(100vh - 64px)', overflowY: 'auto' }}
-      >
-        {renderMenuItem('dashboard', <DashboardOutlined />, 'Tableau de bord')}
-
-        <Menu.SubMenu
-          key="users"
-          icon={<UserOutlined />}
-          title={!collapsed ? 'Utilisateurs' :
-            <Tooltip placement="right" title="Utilisateurs"><UserOutlined /></Tooltip>}
-        >
-          <Menu.Item key="users" onClick={() => navigate('/users')}>
-            Liste des Utilisateurs
-          </Menu.Item>
-          <Menu.Item key="users/kyc" icon={<FileDoneOutlined />} onClick={() => navigate('/users/kyc')}>
-            Vérifications KYC
-          </Menu.Item>
-          <Menu.Item key="users/promotions" icon={<TagsOutlined />} onClick={() => navigate('/users/promotions')}>
-            Promotions
-          </Menu.Item>
-        </Menu.SubMenu>
-
-        <Menu.Item key="campaigns" icon={<ProjectOutlined />} onClick={() => navigate('/campaigns')}>
-          Campagnes
-        </Menu.Item>
-
-        <Menu.SubMenu
-          key="transactions"
-          icon={<WalletOutlined />}
-          title={!collapsed ? 'Transactions' :
-            <Tooltip placement="right" title="Transactions"><WalletOutlined /></Tooltip>}
-        >
-          <Menu.Item key="transactions/list" onClick={() => navigate('/transactions/list')}>
-            Historique Paiements
-          </Menu.Item>
-          <Menu.Item key="subscriptions" onClick={() => navigate('/subscriptions')}>
-            Abonnements
-          </Menu.Item>
-        </Menu.SubMenu>
-
-        <Menu.SubMenu
-          key="skills"
-          icon={<AppstoreOutlined />}
-          title={!collapsed ? 'Compétences' :
-            <Tooltip placement="right" title="Compétences"><AppstoreOutlined /></Tooltip>}
-        >
-          <Menu.Item key="skills/list" onClick={() => navigate('/skills/list')}>
-            Catalogue
-          </Menu.Item>
-          <Menu.Item key="skills/manage" onClick={() => navigate('/skills/manage')}>
-            Gestion des compétences
-          </Menu.Item>
-        </Menu.SubMenu>
-
-        <Menu.Item key="messaging" icon={<MessageOutlined />} onClick={() => navigate('/messaging')}>
-          {!collapsed ? 'Messagerie' : <Tooltip placement="right" title="Messagerie"><MessageOutlined /></Tooltip>}
-        </Menu.Item>
-
-        <Menu.Item key="advertising" icon={<NotificationOutlined />} onClick={() => navigate('/advertising')}>
-          {!collapsed ? 'Publicités' : <Tooltip placement="right" title="Publicités"><NotificationOutlined /></Tooltip>}
-        </Menu.Item>
-
-        <Menu.Item key="settings" icon={<SettingOutlined />} onClick={() => navigate('/settings')}>
-          {!collapsed ? 'Paramètres' : <Tooltip placement="right" title="Paramètres"><SettingOutlined /></Tooltip>}
-        </Menu.Item>
-      </Menu>
-
-      <Divider style={{ background: '#444', margin: 'auto 12px 12px' }} />
-
       <div
+        className="logo"
         style={{
-          position: 'absolute',
-          bottom: 16,
-          width: '100%',
-          textAlign: 'center',
-          padding: '0 12px',
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#fff',
+          fontWeight: 'bold',
+          fontSize: 18,
         }}
       >
-        <Avatar
-          size={collapsed ? 32 : 40}
-          icon={<UserOutlined />}
-          onClick={() => navigate('/profile')}
-          style={{ cursor: 'pointer' }}
-        />
-        {!collapsed && (
-          <div
-            style={{ color: '#fff', marginTop: 8, cursor: 'pointer' }}
-            onClick={() => {
-              localStorage.clear();
-              navigate('/login');
-            }}
-            title="Déconnexion"
-          >
-            <LogoutOutlined /> Déconnexion
-          </div>
-        )}
-    
+        <span style={{ color: '#1890ff' }}>Admin Jobooster</span>
       </div>
+
+      <Menu
+        mode="inline"
+        theme="light"
+        selectedKeys={[selectedKey]}
+        onClick={onMenuClick}
+        items={generateMenuItems(menuItems)}
+        style={{ marginTop: 10 }}
+      />
     </Sider>
   );
 };

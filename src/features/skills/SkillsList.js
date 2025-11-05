@@ -14,8 +14,8 @@ import {
   Space,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../services/axiosInstance';
-import PrestataireCard from './PrestataireCard';
+import axiosInstance from '../../api/axiosInstance';
+import PrestataireCard from '../../pages/PrestataireCard';
 
 const { Sider, Content } = Layout;
 const { Title, Paragraph } = Typography;

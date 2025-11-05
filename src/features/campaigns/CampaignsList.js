@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Input, Button, Space, message, Popconfirm } from 'antd';
 import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
-import { fetchCampaigns, deleteCampaign } from '../services/campaignService';
+import { fetchCampaigns, deleteCampaign } from '../../api/campaignService';
 import { useNavigate } from 'react-router-dom';
 
 const CampaignsList = () => {

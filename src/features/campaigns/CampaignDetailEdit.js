@@ -17,9 +17,9 @@ import {
   fetchCampaignById,
   createCampaign,
   updateCampaign,
-} from '../services/campaignService';
-import { fetchSkillCategories } from '../services/skillService';
-import { fetchGeoZones } from '../services/geoZoneService';
+} from '../../api/campaignService';
+import { fetchSkillCategories } from '../../api/skillService';
+import { fetchGeoZones } from '../../api/geoZoneService';
 
 
 const { RangePicker } = DatePicker;

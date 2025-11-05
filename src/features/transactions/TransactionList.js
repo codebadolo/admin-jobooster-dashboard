@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Tag, message, Button, Modal } from 'antd';
-import axiosInstance from '../services/axiosInstance';
+import axiosInstance from '../../api/axiosInstance';
 
 const statusColors = {
   initiated: 'blue',

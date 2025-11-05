@@ -1,41 +1,63 @@
+// src/App.js
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import Login from './pages/Login';
+// Layout
 import MainLayout from './layout/MainLayout';
-import UserList from './pages/UserList';
-import UserDetail from './pages/UserDetail';
-import ProfilePage from './pages/ProfilePage'; 
-import UserForm from './pages/UserForm';
-import Dashboard from './pages/Dashboard';
-import SkillsList from './pages/SkillsList';
-import ContactsList from './pages/ContactsList';
+
+// Auth
+import Login from './features/auth/Login';
+
+// Dashboard
+import Dashboard from './features/dashboard/Dashboard';
+
+// Users
+import UserList from './features/users/UserList';
+import UserDetail from './features/users/UserDetail';
+import UserForm from './features/users/UserForm';
+import ContactsList from './features/users/ContactsList';
+import UserCVsPage from './features/users/UserCVsPage';
+
+// Profile
+import ProfilePage from './pages/ProfilePage';
 import AdminProfilePage from './pages/AdminProfilePage';
-import UserCVsPage from './pages/UserCVsPage';
-import MissionsList from './pages/MissionsList';
-import MissionCreate from './pages/MissionCreate';
-import MissionDetail from './pages/MissionDetail';
-import KycManagement from './pages/KycManagement';
-import CampaignsPage from './pages/CampaignsPage';
-import PromotionsPage from './pages/PromotionsPage';
-import SkillsManagement from './pages/SkillsManagement';
-import CampaignsList from './pages/CampaignsList';
-import CampaignDetail from './pages/CampaignDetail';
-import CampaignPerformance from './pages/CampaignPerformance';
-import TransactionList from './pages/TransactionList';
-import TransactionDetail from './pages/TransactionDetail';
-import CampaignDetailEdit from './pages/CampaignDetailEdit';
-import AdminTransactionList from './pages/TransactionList';
+import AdminProfileEditPage from './pages/AdminProfileEditPage';
+
+// KYC
+import KycManagement from './features/kyc/KycManagement';
+
+// Skills
+import SkillsList from './features/skills/SkillsList';
+import SkillsManagement from './features/skills/SkillsManagement';
+
+// Promotions
+import PromotionsPage from './features/promotions/PromotionsPage';
+
+
+// Campaigns
+import CampaignsList from './features/campaigns/CampaignsList';
+import CampaignDetail from './features/campaigns/CampaignDetail';
+import CampaignDetailEdit from './features/campaigns/CampaignDetailEdit';
+import CampaignPerformance from './features/campaigns/CampaignPerformance';
+import CampaignsPage from './features/campaigns/CampaignsPage';
+
+// Transactions
+import TransactionList from './features/transactions/TransactionList';
+import TransactionDetail from './features/transactions/TransactionDetail';
+
+// Routes
+import NotFoundPage from './routes/NotFoundPage';
+
 const App = () => {
-  // Initialisez l'authentification selon la présence du token
+  // Vérifie si un token existe déjà
   const [authenticated, setAuthenticated] = useState(!!localStorage.getItem('userToken'));
 
-  // Fonction appelée après connexion réussie
+  // Connexion réussie
   const handleLoginSuccess = () => {
     setAuthenticated(true);
   };
 
-  // Fonction pour la déconnexion
+  // Déconnexion
   const handleLogout = () => {
     setAuthenticated(false);
     localStorage.removeItem('userToken');
@@ -43,51 +65,57 @@ const App = () => {
 
   return (
     <Routes>
-      <Route 
-        path="/login" 
-        element={<Login onLoginSuccess={handleLoginSuccess} />} 
-      />
-<Route
-  path="/*"
-  element={authenticated ? <MainLayout onLogout={handleLogout} /> : <Navigate to="/login" replace />}
->
+      {/* Page de connexion */}
+      <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
 
-        {/* Route index = / */}
+      {/* Routes principales protégées */}
+      <Route
+        path="/*"
+        element={
+          authenticated ? (
+            <MainLayout onLogout={handleLogout} />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      >
+        {/* Tableau de bord */}
         <Route index element={<Dashboard />} />
-        {/* Routes utilisateurs */}
+
+        {/* Utilisateurs */}
         <Route path="users" element={<UserList />} />
-        <Route path="users/:id" element={<UserDetail />} />
         <Route path="users/create" element={<UserForm />} />
         <Route path="users/edit/:id" element={<UserForm />} />
+        <Route path="users/:id" element={<UserDetail />} />
         <Route path="users/contacts" element={<ContactsList />} />
         <Route path="users/cvs" element={<UserCVsPage />} />
-        <Route path="admin/profile" element={<AdminProfilePage />} />
-    {/* Missions routes relatives */}
-  
-<Route path="transactions/list" element={<AdminTransactionList />} />
-<Route path="transactions/:id" element={<TransactionDetail />} />
+        <Route path="users/kyc" element={<KycManagement />} />
+        <Route path="users/promotions" element={<PromotionsPage />} />
 
-  <Route path="users/kyc" element={<KycManagement />} /> {/* Nouvelle route KYC */}
-    <Route path="skills/manage" element={<SkillsManagement />} />
-        {/* Route compétences */}
-          <Route path="users/promotions" element={<PromotionsPage />} /> 
-        <Route path="skills/list" element={<SkillsList />} />
+        {/* Profil */}
         <Route path="profile" element={<ProfilePage />} />
-          <Route path="campaigns" element={<CampaignsList />} />
-<Route path="campaigns/create" element={<CampaignDetailEdit />} />
-<Route path="campaigns/:id" element={<CampaignDetail />} />
-<Route path="campaign-performance" element={<CampaignPerformance />} />
+        <Route path="admin/profile" element={<AdminProfilePage />} />
+        <Route path="admin/profile/edit" element={<AdminProfileEditPage />} />
 
+        {/* Compétences */}
+        {/* <Route path="skills/list" element={<SkillsList />} /> */}
+        <Route path="skills/manage" element={<SkillsManagement />} />
+
+     
+        {/* Campagnes */}
+        <Route path="campaigns" element={<CampaignsList />} />
+        <Route path="campaigns/create" element={<CampaignDetailEdit />} />
+        <Route path="campaigns/:id" element={<CampaignDetail />} />
+        <Route path="campaigns/performance" element={<CampaignPerformance />} />
+        <Route path="campaigns/manage" element={<CampaignsPage />} />
+
+        {/* Transactions */}
+        <Route path="transactions" element={<TransactionList />} />
+        <Route path="transactions/:id" element={<TransactionDetail />} />
       </Route>
-  
-      {/* Gestion root path */}
-      <Route
-        path="/"
-        element={authenticated ? <Navigate to="/" replace /> : <Navigate to="/login" replace />}
-      />
 
-      {/* Fallback 404 */}
-      <Route path="*" element={<h2>Page non trouvée</h2>} />
+      {/* Page 404 */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

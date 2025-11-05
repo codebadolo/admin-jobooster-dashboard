@@ -7,7 +7,7 @@ import {
   createContact,
   updateContact,
   deleteContact,
-} from '../services/userService'; // remplace par le bon chemin vers ton service
+} from '../../api/userService'; // remplace par le bon chemin vers ton service
 
 const { Option } = Select;
 

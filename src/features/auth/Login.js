@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
-import authService from '../services/authService'; // votre service authService
+import authService from '../../api/authService'; // votre service authService
 import { useNavigate } from 'react-router-dom';
 
 const { Title } = Typography;

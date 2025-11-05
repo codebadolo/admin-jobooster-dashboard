@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Avatar, Typography, List, Tag, Row, Col, Spin, Divider } from 'antd';
 import { UserOutlined, ProfileOutlined, IdcardOutlined } from '@ant-design/icons';
-import { getProfile } from '../services/userService'; // Assurez-vous du bon chemin
+import { getProfile } from '../api/userService'; // Assurez-vous du bon chemin
 
 const { Title, Text, Paragraph } = Typography;
 

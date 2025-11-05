@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Card, Spin, message, Tabs, Breadcrumb, Row, Col, Statistic, Divider } from 'antd';
 import { Line, Bar, Pie } from '@ant-design/charts';
-import { fetchCampaignById } from '../services/campaignService';
-import { fetchCampaignPerformance } from '../services/campaignPerformanceService';
+import { fetchCampaignById } from '../../api/campaignService';
+import { fetchCampaignPerformance } from '../../api/campaignPerformanceService';
 
 const { TabPane } = Tabs;
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, message, Tag, Card, Row, Col, Typography, Statistic, Popconfirm } from 'antd';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import axiosInstance from '../services/axiosInstance';
+import axiosInstance from '../../api/axiosInstance';
 
 const { Title } = Typography;
 

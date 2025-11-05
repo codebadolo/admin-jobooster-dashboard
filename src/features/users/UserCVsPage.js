@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Table, Button, Spin, message, Breadcrumb, Input, Space, Row, Col } from 'antd';
 import { DownloadOutlined, FileExcelOutlined, HomeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../services/axiosInstance';
+import axiosInstance from '../../api/axiosInstance';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 

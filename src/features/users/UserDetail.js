@@ -9,7 +9,7 @@ import {
   LinkedinOutlined, FacebookOutlined, PhoneOutlined, TwitterOutlined
 } from '@ant-design/icons';
 import { useParams, Link } from 'react-router-dom';
-import axiosInstance from '../services/axiosInstance';
+import axiosInstance from '../../api/axiosInstance';
 
 const { Header, Content, Sider } = Layout;
 

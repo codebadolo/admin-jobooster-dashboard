@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Select, Card, Spin, message } from 'antd';
 import { Line } from '@ant-design/charts';
-import { fetchCampaigns } from '../services/campaignService';
-import { fetchPerformances } from '../services/campaignPerformanceService';
+import { fetchCampaigns } from '../../api/campaignService';
+import { fetchPerformances } from '../../api/campaignPerformanceService';
 
 const CampaignPerformance = () => {
   const [campaigns, setCampaigns] = useState([]);

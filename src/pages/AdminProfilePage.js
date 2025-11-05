@@ -8,7 +8,7 @@ import {
   PhoneOutlined, PlusOutlined, TagOutlined, FileTextOutlined, StarOutlined, HomeOutlined,
   LinkedinOutlined, WhatsAppOutlined, MailFilled, UploadOutlined
 } from '@ant-design/icons';
-import authService from '../services/authService';
+import authService from '../api/authService';
 
 const { Header, Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
