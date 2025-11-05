@@ -1,130 +1,140 @@
-import React, { useState } from 'react';
-import { DatePicker, Button, Row, Col, Card, Statistic, Typography } from 'antd';
-import { Line } from '@ant-design/charts';
-import moment from 'moment';
-
-const { RangePicker } = DatePicker;
-const { Title } = Typography;
-
-const sampleStats = {
-  users: {
-    total_users: 1200,
-    active_users: 900,
-  },
-  transactions: {
-    total_transactions: 3400,
-    total_volume: 12500000,
-  },
-  visibility: {
-    total_profile_views: 27000,
-    total_contact_clicks: 4200,
-    conversion_rate: 15.5,
-  },
-  messaging: {
-    total_conversations: 1800,
-    total_messages: 9000,
-  },
-  kyc: [
-    { document_type: 'Carte Nationale d\'Identité', submitted_count: 600, verified_count: 580, pending_count: 20 },
-    { document_type: 'Passeport', submitted_count: 300, verified_count: 290, pending_count: 10 },
-  ],
-  advertising: {
-    performance: [
-      { date: '2025-10-01', views: 5000, clicks: 300 },
-      { date: '2025-10-05', views: 5200, clicks: 350 },
-      { date: '2025-10-10', views: 4800, clicks: 310 },
-      { date: '2025-10-15', views: 5300, clicks: 400 },
-      { date: '2025-10-20', views: 4900, clicks: 370 },
-      { date: '2025-10-25', views: 5100, clicks: 390 },
-    ],
-  },
-};
+import React, { useEffect, useState } from 'react';
+import { Row, Col, Card, Statistic, Spin, message } from 'antd';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line, CartesianGrid, ResponsiveContainer } from 'recharts';
+import userService from '../../api/userService';
+import AdminService from '../../api/AdminUserService';
 
 const Dashboard = () => {
-  const [range, setRange] = useState([moment().startOf('month'), moment()]);
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [skillsStats, setSkillsStats] = useState([]);
+  const [genderStats, setGenderStats] = useState([]);
+  const [availabilityStats, setAvailabilityStats] = useState([]);
 
-  const advertisingChartData = sampleStats.advertising.performance.map(item => ({
-    date: moment(item.date).format('DD MMM'),
-    views: item.views,
-    clicks: item.clicks,
-  }));
+  // Récupération des données utilisateurs
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const usersData = await AdminService.fetchUsers();
+      setUsers(usersData);
 
-  const advertisingChartConfig = {
-    data: advertisingChartData,
-    xField: 'date',
-    yField: ['views', 'clicks'],
-    tooltip: { showMarkers: false },
-    smooth: true,
-    height: 200,
-    legend: { position: 'top' },
+      // --- Stats compétences ---
+      const skillCountMap = {};
+      usersData.forEach(user => {
+        user.profile?.skills?.forEach(skill => {
+          const skillName = skill.skill.name;
+          if (skillCountMap[skillName]) skillCountMap[skillName] += 1;
+          else skillCountMap[skillName] = 1;
+        });
+      });
+      setSkillsStats(Object.entries(skillCountMap).map(([name, count]) => ({ name, count })));
+
+      // --- Stats genre ---
+      const genders = { M: 0, F: 0 };
+      usersData.forEach(u => {
+        if (u.profile?.sex) genders[u.profile.sex] += 1;
+      });
+      setGenderStats([
+        { gender: 'Homme', count: genders.M },
+        { gender: 'Femme', count: genders.F }
+      ]);
+
+      // --- Stats disponibilité ---
+      const avail = { disponible: 0, indisponible: 0 };
+      usersData.forEach(u => {
+        if (u.profile?.availability) avail.disponible += 1;
+        else avail.indisponible += 1;
+      });
+      setAvailabilityStats([
+        { status: 'Disponible', count: avail.disponible },
+        { status: 'Indisponible', count: avail.indisponible }
+      ]);
+
+    } catch (error) {
+      console.error(error);
+      message.error("Erreur lors de la récupération des données.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const onRangeChange = (dates) => {
-    setRange(dates);
-    // En vrai, ici vous pouvez déclencher le fetch API avec ces dates
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) return <Spin tip="Chargement..." size="large" style={{ width: '100%', marginTop: 100 }} />;
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={3}>Filtrer par période</Title>
-      <RangePicker value={range} onChange={onRangeChange} />
-      <Button type="primary" style={{ marginLeft: 8 }}>
-        Appliquer
-      </Button>
-
-      <Row gutter={24} style={{ marginTop: 24 }}>
-        <Col span={6}>
+      <Row gutter={[24, 24]}>
+        <Col span={8}>
           <Card>
-            <Statistic title="Utilisateurs totaux" value={sampleStats.users.total_users} />
+            <Statistic title="Total Utilisateurs" value={users.length} />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Card>
-            <Statistic title="Utilisateurs actifs" value={sampleStats.users.active_users} />
+            <Statistic title="Total Compétences Distinctes" value={skillsStats.length} />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Card>
-            <Statistic title="Transactions totales" value={sampleStats.transactions.total_transactions} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="Volume total transaction (XOF)" value={sampleStats.transactions.total_volume} />
+            <Statistic title="Utilisateurs Disponibles" value={availabilityStats.find(a => a.status === 'Disponible')?.count || 0} />
           </Card>
         </Col>
       </Row>
 
-      <Row gutter={24} style={{ marginTop: 24 }}>
-        <Col span={8}>
-          <Card title="Visibilité">
-            <Statistic title="Vues profils" value={sampleStats.visibility.total_profile_views} />
-            <Statistic title="Clics contacts" value={sampleStats.visibility.total_contact_clicks} style={{ marginTop: 16 }} />
-            <Statistic title="Taux conversion (%)" value={sampleStats.visibility.conversion_rate.toFixed(2)} style={{ marginTop: 16 }} />
+      <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+        <Col span={12}>
+          <Card title="Distribution des compétences">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={skillsStats} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <XAxis type="number" />
+                <YAxis dataKey="name" type="category" width={150} />
+                <Tooltip />
+                <Bar dataKey="count" fill="#1890ff" />
+              </BarChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
-        <Col span={8}>
-          <Card title="Messagerie">
-            <Statistic title="Conversations totales" value={sampleStats.messaging.total_conversations} />
-            <Statistic title="Messages totaux" value={sampleStats.messaging.total_messages} style={{ marginTop: 16 }} />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card title="Vérification KYC">
-            {sampleStats.kyc.map(doc => (
-              <div key={doc.document_type} style={{ marginBottom: 12 }}>
-                <b>{doc.document_type}</b><br />
-                Soumis : {doc.submitted_count} — Validés : {doc.verified_count} — En attente : {doc.pending_count}
-              </div>
-            ))}
+        <Col span={12}>
+          <Card title="Répartition par genre">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={genderStats}>
+                <XAxis dataKey="gender" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#52c41a" />
+              </BarChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
       </Row>
 
-      <Row style={{ marginTop: 32 }}>
-        <Col span={24}>
-          <Card title="Performance campagnes (vues vs clics)">
-            <Line {...advertisingChartConfig} />
+      <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+        <Col span={12}>
+          <Card title="Disponibilité des utilisateurs">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={availabilityStats}>
+                <XAxis dataKey="status" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#faad14" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card title="Évolution des compétences par utilisateurs">
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={skillsStats}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="count" stroke="#1890ff" />
+              </LineChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
       </Row>

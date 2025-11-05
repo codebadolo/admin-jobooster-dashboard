@@ -54,7 +54,7 @@ const Sidebar = () => {
           fontSize: 18,
         }}
       >
-        <span style={{ color: '#1890ff' }}>Admin Jobooster</span>
+        <span style={{ color: '#1890ff' }}>Admin Ibaara</span>
       </div>
 
       <Menu

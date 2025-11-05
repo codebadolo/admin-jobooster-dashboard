@@ -13,14 +13,10 @@ import {
 } from 'antd';
 import moment from 'moment';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  fetchCampaignById,
-  createCampaign,
-  updateCampaign,
-} from '../../api/campaignService';
-import { fetchSkillCategories } from '../../api/skillService';
-import { fetchGeoZones } from '../../api/geoZoneService';
 
+import { fetchSkillCategories } from '../../api/skillService';
+import geoZoneService from '../../api/geoZoneService';
+import campaignService from '../../api/campaignService';
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
@@ -38,27 +34,23 @@ const CampaignDetailEdit = () => {
   // Récupérer les catégories et zones pour les selects
   useEffect(() => {
     fetchSkillCategories().then(setCategories);
-    fetchGeoZones().then(setGeoZones);
+    geoZoneService.list().then(setGeoZones);
   }, []);
 
   // Charger données campagne si en édition
   useEffect(() => {
     if (id) {
       setLoading(true);
-      fetchCampaignById(id)
+      campaignService.retrieve(id)
         .then((data) => {
-          setInitialValues({
+          const initial = {
             ...data,
             start_end: [moment(data.start_date), moment(data.end_date)],
             category_id: data.skill_categories.length > 0 ? data.skill_categories[0].id : null,
             geo_zone: data.geo_zone?.id || null,
-          });
-          form.setFieldsValue({
-            ...data,
-            start_end: [moment(data.start_date), moment(data.end_date)],
-            category_id: data.skill_categories.length > 0 ? data.skill_categories[0].id : null,
-            geo_zone: data.geo_zone?.id || null,
-          });
+          };
+          setInitialValues(initial);
+          form.setFieldsValue(initial);
         })
         .catch(() => message.error('Erreur chargement campagne'))
         .finally(() => setLoading(false));
@@ -79,12 +71,12 @@ const CampaignDetailEdit = () => {
       geo_zone: values.geo_zone,
     };
 
-    const action = id ? updateCampaign(id, payload) : createCampaign(payload);
+    const action = id ? campaignService.update(id, payload) : campaignService.create(payload);
 
     action
       .then(() => {
         message.success(`Campagne ${id ? 'mise à jour' : 'créée'} avec succès`);
-        navigate('/campaigns');
+        navigate('/campaigns/list');
       })
       .catch(() => {
         message.error('Erreur lors de la sauvegarde');
@@ -126,7 +118,7 @@ const CampaignDetailEdit = () => {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item name="geo_zone" label="Zone Géographique" >
+        <Form.Item name="geo_zone" label="Zone Géographique">
           <Select allowClear placeholder="Sélectionnez une zone (optionnel)">
             {geoZones.map((zone) => (
               <Select.Option key={zone.id} value={zone.id}>
@@ -140,7 +132,7 @@ const CampaignDetailEdit = () => {
             <Button type="primary" htmlType="submit" loading={loading}>
               {id ? 'Mettre à jour' : 'Créer'}
             </Button>
-            <Button onClick={() => navigate('/campaigns')}>
+            <Button onClick={() => navigate('/campaigns/list')}>
               Annuler
             </Button>
           </Space>

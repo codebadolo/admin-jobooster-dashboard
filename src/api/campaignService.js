@@ -1,20 +1,32 @@
 import axiosInstance from './axiosInstance';
 
-const API_BASE = 'ads/admin/campaigns/';
+const baseURL = 'ads/admin/campaigns/';
 
-export const fetchCampaigns = () =>
-  axiosInstance.get(API_BASE).then(res => res.data);
+const campaignService = {
+  list: async () => {
+    const res = await axiosInstance.get(baseURL);
+    return res.data;
+  },
 
-export const fetchCampaignById = (id) =>
-  axiosInstance.get(`${API_BASE}${id}/`).then(res => res.data);
+  retrieve: async (id) => {
+    const res = await axiosInstance.get(`${baseURL}${id}/`);
+    return res.data;
+  },
 
-export const createCampaign = (data) =>
-  axiosInstance.post(API_BASE, data).then(res => res.data);
+  create: async (payload) => {
+    const res = await axiosInstance.post(baseURL, payload);
+    return res.data;
+  },
 
-export const updateCampaign = (id, data) =>
-  axiosInstance.put(`${API_BASE}${id}/`, data).then(res => res.data);
+  update: async (id, payload) => {
+    const res = await axiosInstance.put(`${baseURL}${id}/`, payload);
+    return res.data;
+  },
 
-export const deleteCampaign = (id) =>
-  axiosInstance.delete(`${API_BASE}${id}/`).then(res => res.data);
+  delete: async (id) => {
+    const res = await axiosInstance.delete(`${baseURL}${id}/`);
+    return res.data;
+  }
+};
 
-export default { fetchCampaigns, fetchCampaignById, createCampaign, updateCampaign, deleteCampaign };
+export default campaignService;

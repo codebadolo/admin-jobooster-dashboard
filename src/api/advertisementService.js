@@ -1,8 +1,8 @@
 import axiosInstance from './axiosInstance';
 
-const baseURL = '/admin/geozones/';
+const baseURL = '/admin/ads/';
 
-const geoZoneService = {
+const advertisementService = {
   list: async () => {
     const res = await axiosInstance.get(baseURL);
     return res.data;
@@ -29,4 +29,4 @@ const geoZoneService = {
   }
 };
 
-export default geoZoneService;
+export default advertisementService;

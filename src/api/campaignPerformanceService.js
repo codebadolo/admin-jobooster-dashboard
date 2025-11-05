@@ -1,10 +1,32 @@
 import axiosInstance from './axiosInstance';
 
-const API_BASE = 'ads/admin/campaignperformances/';
-export const fetchCampaignPerformance = (campaignId) =>
-  axiosInstance.get(`${API_BASE}?campaign=${campaignId}`).then(res => res.data);
+const baseURL = '/admin/campaignperformances/';
 
-export const fetchPerformances = (campaignId) =>
-  axiosInstance.get(`${API_BASE}?campaign=${campaignId}`).then(res => res.data);
+const campaignPerformanceService = {
+  list: async () => {
+    const res = await axiosInstance.get(baseURL);
+    return res.data;
+  },
 
-export default { fetchPerformances };
+  listByCampaign: async (campaignId) => {
+    const res = await axiosInstance.get(baseURL, { params: { campaign: campaignId } });
+    return res.data;
+  },
+
+  create: async (payload) => {
+    const res = await axiosInstance.post(baseURL, payload);
+    return res.data;
+  },
+
+  update: async (id, payload) => {
+    const res = await axiosInstance.put(`${baseURL}${id}/`, payload);
+    return res.data;
+  },
+
+  delete: async (id) => {
+    const res = await axiosInstance.delete(`${baseURL}${id}/`);
+    return res.data;
+  }
+};
+
+export default campaignPerformanceService;

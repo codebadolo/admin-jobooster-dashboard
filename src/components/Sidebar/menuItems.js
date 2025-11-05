@@ -5,6 +5,7 @@ import {
   ProjectOutlined,
   DollarOutlined,
   ProfileOutlined,
+  NotificationOutlined,
   TeamOutlined,
   SettingOutlined,
   SolutionOutlined,
@@ -32,25 +33,21 @@ const menuItems = [
       { key: 'users-kyc', label: 'KYC', path: '/users/kyc' },
     ],
   },
-  {
-    key: 'campaigns',
-    icon: <ProjectOutlined />,
-    label: 'Campagnes',
-    children: [
-      { key: 'campaigns-list', label: 'Liste', path: '/campaigns' },
-      { key: 'campaigns-create', label: 'Créer', path: '/campaigns/create' },
-      { key: 'campaign-performance', label: 'Performance', path: '/campaign-performance' },
-    ],
-  },
-  {
-    key: 'missions',
-    icon: <SolutionOutlined />,
-    label: 'Missions',
-    children: [
-      { key: 'missions-list', label: 'Liste', path: '/missions' },
-      { key: 'missions-create', label: 'Créer', path: '/missions/create' },
-    ],
-  },
+ {
+  key: 'advertising',
+  label: 'Advertising',
+  icon: <NotificationOutlined />,
+  children: [
+    { key: 'campaigns-list', label: 'Campagnes', path: '/campaigns/list' },
+    { key: 'campaign-performance', label: 'Performances', path: '/campaigns/performance' },
+    { key: 'advertisements-list', label: 'Annonces', path: '/advertisements/list' },
+    { key: 'promotions-list', label: 'Promotions', path: '/promotions' },
+    { key: 'geozones-list', label: 'Zones Géographiques', path: '/geozones/list' },
+    { key: 'advertising-dashboard', label: 'Dashboard', path: '/advertising' },
+  ]
+}
+,
+
   {
     key: 'transactions',
     icon: <DollarOutlined />,

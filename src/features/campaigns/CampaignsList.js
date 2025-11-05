@@ -1,65 +1,92 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Input, Button, Space, message, Popconfirm } from 'antd';
-import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
-import { fetchCampaigns, deleteCampaign } from '../../api/campaignService';
-import { useNavigate } from 'react-router-dom';
+import { Table, Button, Space, Modal, Form, Input, Select, DatePicker, message, Popconfirm } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import campaignService from '../../api/campaignService';
+
+const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const CampaignsList = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState(null);
+  const [form] = Form.useForm();
 
-  const loadCampaigns = () => {
+  const fetchCampaigns = async () => {
     setLoading(true);
-    fetchCampaigns()
-      .then(data => {
-        if (searchTerm) {
-          const filtered = data.filter(c =>
-            c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.advertiser.email.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-          setCampaigns(filtered);
-        } else {
-          setCampaigns(data);
-        }
-      })
-      .catch(() => message.error("Erreur au chargement des campagnes"))
-      .finally(() => setLoading(false));
+    try {
+      const data = await campaignService.list();
+      setCampaigns(data);
+    } catch (err) {
+      message.error('Erreur lors du chargement des campagnes');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadCampaigns();
-  }, [searchTerm]);
+    fetchCampaigns();
+  }, []);
 
-  const handleDelete = (id) => {
-    deleteCampaign(id)
-      .then(() => {
-        message.success("Campagne supprimée");
-        loadCampaigns();
-      })
-      .catch(() => message.error("Erreur suppression campagne"));
+  const openModal = (campaign = null) => {
+    setEditingCampaign(campaign);
+    form.resetFields();
+    if (campaign) form.setFieldsValue({ ...campaign });
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setEditingCampaign(null);
+  };
+
+  const onFinish = async (values) => {
+    try {
+      if (editingCampaign) {
+        await campaignService.update(editingCampaign.id, values);
+        message.success('Campagne mise à jour');
+      } else {
+        await campaignService.create(values);
+        message.success('Campagne créée');
+      }
+      fetchCampaigns();
+      closeModal();
+    } catch (err) {
+      message.error('Erreur lors de l’enregistrement');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await campaignService.delete(id);
+      message.success('Campagne supprimée');
+      fetchCampaigns();
+    } catch {
+      message.error('Erreur lors de la suppression');
+    }
   };
 
   const columns = [
-    { title: 'ID', dataIndex: 'id', key: 'id', width: 70 },
     { title: 'Titre', dataIndex: 'title', key: 'title' },
     { title: 'Annonceur', dataIndex: ['advertiser', 'email'], key: 'advertiser' },
-    { title: 'Budget (FCFA)', dataIndex: 'budget', key: 'budget' },
+    { title: 'Budget', dataIndex: 'budget', key: 'budget' },
     { title: 'Statut', dataIndex: 'status', key: 'status' },
+    { title: 'Date Début', dataIndex: 'start_date', key: 'start_date' },
+    { title: 'Date Fin', dataIndex: 'end_date', key: 'end_date' },
     {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space>
-          <Button type="link" onClick={() => navigate(`/campaigns/${record.id}`)}>Voir / Modifier</Button>
+          <Button icon={<EditOutlined />} onClick={() => openModal(record)} />
           <Popconfirm
-            title="Confirmer suppression ?"
+            title="Supprimer cette campagne ?"
             onConfirm={() => handleDelete(record.id)}
             okText="Oui"
             cancelText="Non"
           >
-            <Button danger type="link">Supprimer</Button>
+            <Button danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       )
@@ -67,27 +94,48 @@ const CampaignsList = () => {
   ];
 
   return (
-    <div style={{ background: '#fff', padding: 24 }}>
-      <Space style={{ marginBottom: 16 }}>
-        <Input
-          placeholder="Rechercher par titre ou annonceur"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          prefix={<SearchOutlined />}
-          allowClear
-        />
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/campaigns/create')}>
-          Nouvelle Campagne
-        </Button>
-      </Space>
+    <>
+      <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 16 }} onClick={() => openModal()}>
+        Nouvelle Campagne
+      </Button>
+
       <Table
-        rowKey="id"
-        columns={columns}
         dataSource={campaigns}
+        columns={columns}
+        rowKey="id"
         loading={loading}
         pagination={{ pageSize: 10 }}
       />
-    </div>
+
+      <Modal
+        title={editingCampaign ? 'Modifier Campagne' : 'Nouvelle Campagne'}
+        visible={modalVisible}
+        onCancel={closeModal}
+        onOk={() => form.submit()}
+        destroyOnClose
+      >
+        <Form layout="vertical" form={form} onFinish={onFinish}>
+          <Form.Item name="title" label="Titre" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="description" label="Description">
+            <Input.TextArea />
+          </Form.Item>
+          <Form.Item name="budget" label="Budget" rules={[{ required: true }]}>
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item name="status" label="Statut" rules={[{ required: true }]}>
+            <Select>
+              <Option value="draft">Brouillon</Option>
+              <Option value="active">Active</Option>
+              <Option value="paused">Suspendue</Option>
+              <Option value="completed">Terminée</Option>
+              <Option value="cancelled">Annulée</Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   );
 };
 

@@ -31,8 +31,7 @@ import SkillsList from './features/skills/SkillsList';
 import SkillsManagement from './features/skills/SkillsManagement';
 
 // Promotions
-import PromotionsPage from './features/promotions/PromotionsPage';
-
+import PromotionsPage from './features/campaigns/PromotionsPage';
 
 // Campaigns
 import CampaignsList from './features/campaigns/CampaignsList';
@@ -40,6 +39,8 @@ import CampaignDetail from './features/campaigns/CampaignDetail';
 import CampaignDetailEdit from './features/campaigns/CampaignDetailEdit';
 import CampaignPerformance from './features/campaigns/CampaignPerformance';
 import CampaignsPage from './features/campaigns/CampaignsPage';
+import AdvertisementsPage from './features/campaigns/AdvertisementsPage';
+import GeoZonesPage from './features/campaigns/GeoZonesPage';
 
 // Transactions
 import TransactionList from './features/transactions/TransactionList';
@@ -90,7 +91,6 @@ const App = () => {
         <Route path="users/contacts" element={<ContactsList />} />
         <Route path="users/cvs" element={<UserCVsPage />} />
         <Route path="users/kyc" element={<KycManagement />} />
-        <Route path="users/promotions" element={<PromotionsPage />} />
 
         {/* Profil */}
         <Route path="profile" element={<ProfilePage />} />
@@ -98,16 +98,23 @@ const App = () => {
         <Route path="admin/profile/edit" element={<AdminProfileEditPage />} />
 
         {/* Compétences */}
-        {/* <Route path="skills/list" element={<SkillsList />} /> */}
+        <Route path="skills/list" element={<SkillsList />} />
         <Route path="skills/manage" element={<SkillsManagement />} />
 
-     
         {/* Campagnes */}
-        <Route path="campaigns" element={<CampaignsList />} />
+        <Route path="campaigns/list" element={<CampaignsList />} />
         <Route path="campaigns/create" element={<CampaignDetailEdit />} />
         <Route path="campaigns/:id" element={<CampaignDetail />} />
         <Route path="campaigns/performance" element={<CampaignPerformance />} />
-        <Route path="campaigns/manage" element={<CampaignsPage />} />
+
+        {/* Publicités */}
+        <Route path="advertisements/list" element={<AdvertisementsPage />} />
+
+        {/* Promotions */}
+        <Route path="promotions/list" element={<PromotionsPage />} />
+
+        {/* GeoZones */}
+        <Route path="geozones/list" element={<GeoZonesPage />} />
 
         {/* Transactions */}
         <Route path="transactions" element={<TransactionList />} />

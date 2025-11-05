@@ -1,60 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Select, Card, Spin, message } from 'antd';
-import { Line } from '@ant-design/charts';
-import { fetchCampaigns } from '../../api/campaignService';
-import { fetchPerformances } from '../../api/campaignPerformanceService';
+import { Table, message, Spin } from 'antd';
+import campaignPerformanceService from '../../api/campaignPerformanceService';
 
 const CampaignPerformance = () => {
-  const [campaigns, setCampaigns] = useState([]);
-  const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [performances, setPerformances] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchCampaigns()
-      .then(setCampaigns)
-      .catch(() => message.error('Erreur chargement campagnes'));
-  }, []);
-
-  useEffect(() => {
-    if (selectedCampaignId) {
-      setLoading(true);
-      fetchPerformances(selectedCampaignId)
-        .then(setPerformances)
-        .catch(() => message.error('Erreur chargement performances'))
-        .finally(() => setLoading(false));
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const data = await campaignPerformanceService.list();
+      setPerformances(data);
+    } catch {
+      message.error("Erreur lors du chargement des performances");
+    } finally {
+      setLoading(false);
     }
-  }, [selectedCampaignId]);
-
-  const data = performances.map(p => ({
-    date: p.date,
-    vues: p.views,
-    clics: p.clicks,
-  })).flatMap(p => [
-    { date: p.date, type: 'Vues', value: p.vues },
-    { date: p.date, type: 'Clics', value: p.clics },
-  ]);
-
-  const config = {
-    data,
-    xField: 'date',
-    yField: 'value',
-    seriesField: 'type',
-    smooth: true,
-    animation: { appear: { animation: 'path-in', duration: 500 } },
   };
 
+  useEffect(() => { fetchData(); }, []);
+
+  if (loading) return <Spin />;
+
   return (
-    <Card title="Performance Campagne" style={{ maxWidth: 900, margin: 'auto' }}>
-      <Select
-        placeholder="Sélectionner une campagne"
-        style={{ marginBottom: 16, width: '100%' }}
-        options={campaigns.map(c => ({ label: c.title, value: c.id }))}
-        onChange={setSelectedCampaignId}
-        value={selectedCampaignId}
-      />
-      {loading ? <Spin /> : <Line {...config} />}
-    </Card>
+    <Table
+      dataSource={performances}
+      columns={[
+        { title: 'Campagne', dataIndex: ['campaign', 'title'], key: 'campaign' },
+        { title: 'Date', dataIndex: 'date', key: 'date' },
+        { title: 'Vues', dataIndex: 'views', key: 'views' },
+        { title: 'Clics', dataIndex: 'clicks', key: 'clicks' },
+        { title: 'Taux (%)', dataIndex: 'click_rate', key: 'click_rate' }
+      ]}
+      rowKey="id"
+      pagination={{ pageSize: 10 }}
+    />
   );
 };
 

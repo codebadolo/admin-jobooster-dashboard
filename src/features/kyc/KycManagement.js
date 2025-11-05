@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, message, Tag, Card, Row, Col, Typography, Statistic, Popconfirm } from 'antd';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import axiosInstance from '../../api/axiosInstance';
+import AdminService from '../../api/AdminUserService'; // Service admin qui contient updateKycDocument
 
 const { Title } = Typography;
 
@@ -12,15 +12,17 @@ const KycManagement = () => {
   const [modalDoc, setModalDoc] = useState(null);
   const [stats, setStats] = useState({ total: 0, verified: 0, pending: 0 });
 
+  // Charger tous les documents KYC
   const fetchKycData = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get('/users/admin/kyc-documents/');
-      setKycData(response.data);
-      const total = response.data.length;
-      const verified = response.data.filter(doc => doc.verified).length;
+      const data = await AdminService.fetchKycDocuments(); // axiosInstance.get('/users/admin/kyc-documents/')
+      setKycData(data);
+      const total = data.length;
+      const verified = data.filter(doc => doc.verified).length;
       setStats({ total, verified, pending: total - verified });
     } catch (error) {
+      console.error(error);
       message.error("Erreur lors du chargement des documents KYC.");
     } finally {
       setLoading(false);
@@ -31,22 +33,26 @@ const KycManagement = () => {
     fetchKycData();
   }, []);
 
-  const handleValidate = async (id) => {
+  // Valider un document (PATCH)
+  const handleValidate = async (doc) => {
     try {
-      await axiosInstance.patch(`/users/admin/kyc-documents/${id}/`, { verified: true });
+      await AdminService.updateKycDocument(doc.id, { verified: true });
       message.success("Document validé !");
       fetchKycData();
-    } catch {
+    } catch (error) {
+      console.error(error);
       message.error("Erreur lors de la validation.");
     }
   };
 
-  const handleReject = async (id) => {
+  // Rejeter un document (PATCH)
+  const handleReject = async (doc) => {
     try {
-      await axiosInstance.patch(`/users/admin/kyc-documents/${id}/`, { verified: false });
+      await AdminService.updateKycDocument(doc.id, { verified: false });
       message.success("Document rejeté.");
       fetchKycData();
-    } catch {
+    } catch (error) {
+      console.error(error);
       message.error("Erreur lors du rejet.");
     }
   };
@@ -113,7 +119,7 @@ const KycManagement = () => {
       title: 'Créé le',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: text => new Date(text).toLocaleDateString(),
+      render: text => text ? new Date(text).toLocaleDateString() : '-',
       sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
       width: 120,
     },
@@ -126,7 +132,7 @@ const KycManagement = () => {
         <>
           <Popconfirm
             title="Valider ce document ?"
-            onConfirm={() => handleValidate(record.id)}
+            onConfirm={() => handleValidate(record)}
             okText="Oui"
             cancelText="Non"
             disabled={record.verified}
@@ -143,7 +149,7 @@ const KycManagement = () => {
 
           <Popconfirm
             title="Rejeter ce document ?"
-            onConfirm={() => handleReject(record.id)}
+            onConfirm={() => handleReject(record)}
             okText="Oui"
             cancelText="Non"
             disabled={!record.verified}
@@ -192,7 +198,7 @@ const KycManagement = () => {
 
       <Modal
         visible={modalVisible}
-        title={`Prévisualisation - ${modalDoc?.document_type.toUpperCase() || ''}`}
+        title={`Prévisualisation - ${modalDoc?.document_type?.toUpperCase() || ''}`}
         footer={null}
         onCancel={() => setModalVisible(false)}
         width={700}
