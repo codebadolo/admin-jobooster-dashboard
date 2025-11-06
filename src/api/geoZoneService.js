@@ -1,6 +1,6 @@
 import axiosInstance from './axiosInstance';
 
-const baseURL = '/admin/geozones/';
+const baseURL = 'ads/admin/geozones/';
 
 const geoZoneService = {
   list: async () => {

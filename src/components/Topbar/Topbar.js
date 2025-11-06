@@ -31,7 +31,7 @@ const Topbar = ({ collapsed, onToggleSidebar }) => {
 
   const menu = (
     <div style={{ padding: 12 }}>
-      <a href="admin/profile" style={{ display: 'block', marginBottom: 30 }}>
+      <a href="admin/profile" style={{ display: 'block', marginBottom: 60 }}>
         <UserOutlined /> Mon Profil
       </a>
       <a onClick={handleLogout} style={{ display: 'block', cursor: 'pointer' }}>

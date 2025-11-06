@@ -1,6 +1,6 @@
 import axiosInstance from './axiosInstance';
 
-const baseURL = '/admin/campaignperformances/';
+const baseURL = 'ads/admin/campaignperformances/';
 
 const campaignPerformanceService = {
   list: async () => {

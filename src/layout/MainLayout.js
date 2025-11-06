@@ -12,8 +12,8 @@ const MainLayout = ({ onLogout }) => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sidebar />
       <Layout>
-        <Topbar onLogout={onLogout} />
-        <Content style={{ margin: '24px 24px', padding: 24, background: '#fff' }}>
+        <Topbar onLogout={onLogout} style={{ marginBottom: 12}} />
+        <Content style={{ margin: '2px 2px', padding:20, background: '#fff' }}>
           <Outlet />
         </Content>
       </Layout>

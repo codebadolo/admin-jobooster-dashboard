@@ -22,7 +22,7 @@ const SkillsList = () => {
   const [allSkills, setAllSkills] = useState([]);
   const [allZones, setAllZones] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 12;
 
   // Charger prestataires
   const fetchUsers = async () => {

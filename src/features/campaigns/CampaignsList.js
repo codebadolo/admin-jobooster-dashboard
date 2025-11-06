@@ -1,18 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Space, Modal, Form, Input, Select, DatePicker, message, Popconfirm } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+  Table,
+  Button,
+  Space,
+  Form,
+  Input,
+  Select,
+  message,
+  Popconfirm,
+  Breadcrumb,
+  Card,
+  Row,
+  Col,
+} from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, FileExcelOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import campaignService from '../../api/campaignService';
 
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 
 const CampaignsList = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
   const [form] = Form.useForm();
+  const navigate = useNavigate();
 
+  // Fetch campaigns
   const fetchCampaigns = async () => {
     setLoading(true);
     try {
@@ -29,34 +43,12 @@ const CampaignsList = () => {
     fetchCampaigns();
   }, []);
 
-  const openModal = (campaign = null) => {
-    setEditingCampaign(campaign);
-    form.resetFields();
-    if (campaign) form.setFieldsValue({ ...campaign });
-    setModalVisible(true);
+  // Redirect to campaign detail
+  const openDetails = (campaign) => {
+    navigate(`/campaigns/${campaign.id}`);
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
-    setEditingCampaign(null);
-  };
-
-  const onFinish = async (values) => {
-    try {
-      if (editingCampaign) {
-        await campaignService.update(editingCampaign.id, values);
-        message.success('Campagne mise à jour');
-      } else {
-        await campaignService.create(values);
-        message.success('Campagne créée');
-      }
-      fetchCampaigns();
-      closeModal();
-    } catch (err) {
-      message.error('Erreur lors de l’enregistrement');
-    }
-  };
-
+  // Delete campaign
   const handleDelete = async (id) => {
     try {
       await campaignService.delete(id);
@@ -67,38 +59,84 @@ const CampaignsList = () => {
     }
   };
 
+  // Export campaigns to Excel (simple CSV approach)
+  const handleExportExcel = () => {
+    const csvContent = [
+      ['Titre', 'Annonceur', 'Budget', 'Statut', 'Date Début', 'Date Fin'],
+      ...campaigns.map((c) => [
+        c.title,
+        c.advertiser?.email || '',
+        c.budget,
+        c.status,
+        c.start_date,
+        c.end_date,
+      ]),
+    ]
+      .map((e) => e.join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'campaigns.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Table columns with filters
   const columns = [
-    { title: 'Titre', dataIndex: 'title', key: 'title' },
-    { title: 'Annonceur', dataIndex: ['advertiser', 'email'], key: 'advertiser' },
-    { title: 'Budget', dataIndex: 'budget', key: 'budget' },
-    { title: 'Statut', dataIndex: 'status', key: 'status' },
-    { title: 'Date Début', dataIndex: 'start_date', key: 'start_date' },
-    { title: 'Date Fin', dataIndex: 'end_date', key: 'end_date' },
+    { title: 'Titre', dataIndex: 'title', key: 'title', sorter: (a, b) => a.title.localeCompare(b.title) },
+    { title: 'Annonceur', dataIndex: ['advertiser', 'email'], key: 'advertiser', filters: [...new Set(campaigns.map(c => c.advertiser?.email))].map(email => ({ text: email, value: email })), onFilter: (value, record) => record.advertiser?.email === value },
+    { title: 'Budget', dataIndex: 'budget', key: 'budget', sorter: (a, b) => a.budget - b.budget },
+    { title: 'Statut', dataIndex: 'status', key: 'status', filters: [
+      { text: 'Brouillon', value: 'draft' },
+      { text: 'Active', value: 'active' },
+      { text: 'Suspendue', value: 'paused' },
+      { text: 'Terminée', value: 'completed' },
+      { text: 'Annulée', value: 'cancelled' },
+    ], onFilter: (value, record) => record.status === value },
+    { title: 'Date Début', dataIndex: 'start_date', key: 'start_date', sorter: (a, b) => new Date(a.start_date) - new Date(b.start_date) },
+    { title: 'Date Fin', dataIndex: 'end_date', key: 'end_date', sorter: (a, b) => new Date(a.end_date) - new Date(b.end_date) },
     {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => openModal(record)} />
-          <Popconfirm
-            title="Supprimer cette campagne ?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Oui"
-            cancelText="Non"
-          >
+          <Button icon={<EyeOutlined />} onClick={() => openDetails(record)}>Détails</Button>
+          <Button icon={<EditOutlined />} onClick={() => message.info('Modifier non implémenté pour l’instant')} />
+          <Popconfirm title="Supprimer cette campagne ?" onConfirm={() => handleDelete(record.id)} okText="Oui" cancelText="Non">
             <Button danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
-      )
-    }
+      ),
+    },
   ];
 
   return (
-    <>
-      <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 16 }} onClick={() => openModal()}>
-        Nouvelle Campagne
-      </Button>
+    <Card>
+      {/* Breadcrumb */}
+      <Breadcrumb style={{ marginBottom: 16 }}>
+        <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
+        <Breadcrumb.Item>Campagnes</Breadcrumb.Item>
+      </Breadcrumb>
 
+      {/* Top controls: buttons */}
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => message.info('Créer une nouvelle campagne')} >
+            Nouvelle Campagne
+          </Button>
+        </Col>
+        <Col>
+          <Button icon={<FileExcelOutlined />} onClick={handleExportExcel}>
+            Export Excel
+          </Button>
+        </Col>
+      </Row>
+
+      {/* Campaigns Table */}
       <Table
         dataSource={campaigns}
         columns={columns}
@@ -106,36 +144,7 @@ const CampaignsList = () => {
         loading={loading}
         pagination={{ pageSize: 10 }}
       />
-
-      <Modal
-        title={editingCampaign ? 'Modifier Campagne' : 'Nouvelle Campagne'}
-        visible={modalVisible}
-        onCancel={closeModal}
-        onOk={() => form.submit()}
-        destroyOnClose
-      >
-        <Form layout="vertical" form={form} onFinish={onFinish}>
-          <Form.Item name="title" label="Titre" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="description" label="Description">
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item name="budget" label="Budget" rules={[{ required: true }]}>
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item name="status" label="Statut" rules={[{ required: true }]}>
-            <Select>
-              <Option value="draft">Brouillon</Option>
-              <Option value="active">Active</Option>
-              <Option value="paused">Suspendue</Option>
-              <Option value="completed">Terminée</Option>
-              <Option value="cancelled">Annulée</Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </>
+    </Card>
   );
 };
 

@@ -1,6 +1,6 @@
 import axiosInstance from './axiosInstance';
 
-const baseURL = '/admin/promotions/';
+const baseURL = 'ads/admin/promotions/';
 
 const promotionService = {
   list: async () => {

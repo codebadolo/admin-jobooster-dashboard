@@ -1,6 +1,6 @@
 import axiosInstance from './axiosInstance';
 
-const API_URL = '/ads/admin/';
+const API_URL = 'ads/admin/';
 
 // GeoZone
 export const fetchGeoZones = () => axiosInstance.get(`${API_URL}geozones/`).then(res => res.data);

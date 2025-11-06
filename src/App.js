@@ -41,7 +41,7 @@ import CampaignPerformance from './features/campaigns/CampaignPerformance';
 import CampaignsPage from './features/campaigns/CampaignsPage';
 import AdvertisementsPage from './features/campaigns/AdvertisementsPage';
 import GeoZonesPage from './features/campaigns/GeoZonesPage';
-
+import AdvertisingDashboard from './features/campaigns/Dashboard';
 // Transactions
 import TransactionList from './features/transactions/TransactionList';
 import TransactionDetail from './features/transactions/TransactionDetail';
@@ -115,7 +115,7 @@ const App = () => {
 
         {/* GeoZones */}
         <Route path="geozones/list" element={<GeoZonesPage />} />
-
+         <Route path="advertising" element={<AdvertisingDashboard />} />
         {/* Transactions */}
         <Route path="transactions" element={<TransactionList />} />
         <Route path="transactions/:id" element={<TransactionDetail />} />
