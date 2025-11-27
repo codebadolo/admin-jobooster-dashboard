@@ -48,7 +48,7 @@ const UserList = () => {
     try {
       const response = await axiosInstance.get('users/admin/users/');
       const data = Array.isArray(response.data) ? response.data : Object.values(response.data);
-      setUsers(data);
+      setUsers(data.filter(u => u != null)); // filtrer les null
     } catch (error) {
       message.error('Erreur lors du chargement des utilisateurs');
     } finally {
@@ -58,20 +58,20 @@ const UserList = () => {
 
   const stats = {
     totalUsers: users.length,
-    totalClients: users.filter(u => u.role === 'client').length,
-    totalPrestataires: users.filter(u => u.role === 'prestataire').length,
-    totalAdmins: users.filter(u => u.role === 'admin').length,
+    totalClients: users.filter(u => u?.role === 'client').length,
+    totalPrestataires: users.filter(u => u?.role === 'prestataire').length,
+    totalAdmins: users.filter(u => u?.role === 'admin').length,
   };
 
   const handleExport = () => {
-    const dataToExport = users.map(({ email, role, is_active, profile, contacts }) => ({
-      Email: email,
-      Rôle: role,
-      Actif: is_active ? 'Oui' : 'Non',
-      Prénom: profile?.first_name || '',
-      Nom: profile?.last_name || '',
-      Zones: profile?.coverage_zones?.map(z => z.name).join(', ') || '',
-      Téléphones: (contacts?.filter(c => c.contact_type === 'phone').map(c => c.value).join(', ')) || '',
+    const dataToExport = users.map(u => ({
+      Email: u?.email || '',
+      Rôle: u?.role || '',
+      Actif: u?.is_active ? 'Oui' : 'Non',
+      Prénom: u?.profile?.first_name || '',
+      Nom: u?.profile?.last_name || '',
+      Zones: u?.profile?.coverage_zones?.map(z => z.name).join(', ') || '',
+      Téléphones: (u?.contacts?.filter(c => c.contact_type === 'phone').map(c => c.value).join(', ')) || '',
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -82,15 +82,15 @@ const UserList = () => {
   };
 
   const filteredUsers = users.filter(user =>
-    user.email?.toLowerCase().includes(searchText.toLowerCase()) ||
-    user.role?.toLowerCase().includes(searchText.toLowerCase()) ||
-    user.profile?.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-    user.profile?.last_name?.toLowerCase().includes(searchText.toLowerCase())
+    user?.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+    user?.role?.toLowerCase().includes(searchText.toLowerCase()) ||
+    user?.profile?.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+    user?.profile?.last_name?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const onDelete = async userId => {
     try {
-      await axiosInstance.delete(`admin/users/${userId}/`);
+      await axiosInstance.delete(`users/admin/users/${userId}/`);
       message.success('Utilisateur supprimé');
       fetchUsers();
     } catch (error) {
@@ -103,17 +103,20 @@ const UserList = () => {
       title: 'Photo',
       dataIndex: ['profile', 'photo'],
       key: 'photo',
-      render: (photo) =>
-        photo ? <Avatar src={photo} /> : <Avatar icon={<UserOutlined />} />,
+      render: photo => photo ? <Avatar src={photo} /> : <Avatar icon={<UserOutlined />} />,
       width: 70,
     },
     {
       title: 'Nom Complet',
       key: 'fullName',
-      render: (_, record) => `${record.profile?.first_name || ''} ${record.profile?.last_name || ''}`,
-      sorter: (a, b) => (a.profile?.first_name || '').localeCompare(b.profile?.first_name || ''),
+      render: (_, record) => {
+        const first = record?.profile?.first_name || '';
+        const last = record?.profile?.last_name || '';
+        return `${first} ${last}` || '-';
+      },
+      sorter: (a, b) => (a?.profile?.first_name || '').localeCompare(b?.profile?.first_name || ''),
     },
-    { title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => a.email.localeCompare(b.email) },
+    { title: 'Email', dataIndex: 'email', key: 'email', sorter: (a, b) => (a?.email || '').localeCompare(b?.email || '') },
     {
       title: 'Rôle',
       dataIndex: 'role',
@@ -123,55 +126,53 @@ const UserList = () => {
         { text: 'Client', value: 'client' },
         { text: 'Administrateur', value: 'admin' },
       ],
-      onFilter: (value, record) => record.role === value,
-      render: (role) => <Tag color={roleColors[role]}>{role}</Tag>,
+      onFilter: (value, record) => record?.role === value,
+      render: role => role ? <Tag color={roleColors[role]}>{role}</Tag> : <Tag>-</Tag>,
     },
     {
       title: 'Sexe',
       dataIndex: ['profile', 'sex'],
       key: 'sex',
-      render: (sex) => {
-        const s = sexMap[sex];
-        return s ? <Tag color={s.color}>{s.label}</Tag> : <Tag color="default">Inconnu</Tag>;
+      render: sex => {
+        const s = sexMap[sex] || { label: '-', color: 'default' };
+        return <Tag color={s.color}>{s.label}</Tag>;
       },
     },
     {
       title: 'Tranche d\'âge',
       dataIndex: ['profile', 'age_range'],
       key: 'age_range',
-      render: (ageRange) => ageRangeMap[ageRange] || '-',
+      render: ageRange => ageRangeMap[ageRange] || '-',
     },
     {
       title: 'Disponibilité',
       dataIndex: ['profile', 'availability'],
       key: 'availability',
-      render: (available) =>
-        available ? <Tag color="green">Disponible</Tag> : <Tag color="red">Indisponible</Tag>,
+      render: available => available ? <Tag color="green">Disponible</Tag> : <Tag color="red">Indisponible</Tag>,
     },
     {
       title: 'Zones de couverture',
       dataIndex: ['profile', 'coverage_zones'],
       key: 'coverageZones',
-      render: (zones) => zones?.length ? zones.map(z => <Tag key={z.id}>{z.name}</Tag>) : '-',
+      render: zones => zones?.length ? zones.map(z => <Tag key={z.id}>{z.name}</Tag>) : '-',
     },
     {
       title: 'Abonnement',
       dataIndex: ['profile', 'subscription_status'],
       key: 'subscription',
-      render: (status) => status || '-',
+      render: status => status || '-',
     },
     {
       title: 'Badge Vérifié',
       dataIndex: ['profile', 'verified_badge'],
       key: 'verified',
-      render: (verified) =>
-        verified ? <Tag color="green">✔️</Tag> : <Tag color="default">❌</Tag>,
+      render: verified => verified ? <Tag color="green">✔️</Tag> : <Tag color="default">❌</Tag>,
     },
     {
       title: 'Téléphones',
       key: 'phones',
       render: (_, record) => {
-        const phones = record.contacts?.filter(c => c.contact_type === 'phone') || [];
+        const phones = record?.contacts?.filter(c => c.contact_type === 'phone') || [];
         return phones.length ? phones.map(p => <div key={p.id}>{p.value}</div>) : '-';
       },
     },
